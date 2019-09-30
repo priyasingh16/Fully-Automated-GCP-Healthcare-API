@@ -7,13 +7,16 @@ Parth Tandel, Priya Singh, Monica Mishra
 # Summary
 Though a vast majority of healthcare data is present in digital format but due to the unstructured nature (dates, notes, lab results) of the dataset, typical machine learning model are restricted to only a few variables. The MIMIC-III dataset eradicates this problem by structuring data from various sources into a set of formulated tables namely ADMISSIONS (information about patient's visits), INPUTEVENTS (readings of health monitor machines), CHARTEVENTS (record of medicines taken by patients), etc. The dataset is rich in information yet due to the immense size of tables (~50 GB), there is a need to build timeline of a patient's visit for future data analysis or model creation. Our efforts are heavily inclined towards creating a single source dataset that captures entire history of a patient which advertently makes training an ML model straightforward.
 
+In order to access the MIMIC-III data a special training is required and once the training is successfully completed, an application is submitted for credentialed access. 
+
 
 # Proposed plan of research
-The main task of the project is the creation of a data pipeline to represent a patient's history, after extensive research on restructuring the data, we understood that the Fast Healthcare Interoperability Resources (FHIR) format is an universaly accepted form. To standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which are Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data. 
+The main task of the project is the creation of a data pipeline to represent a patient's history, after extensive research on restructuring the data, we understood that the Fast Healthcare Interoperability Resources (FHIR) format is a universaly accepted structure. To standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which is Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data. This enables a user to decide how the data to be structured once, then once can use special generated source code to easily write and read the structured data to and from a variety of data streams and using a variety of languages.
 
 ![Figure 1: MIMIC-III critical care database](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fsdata.2016.35/MediaObjects/41597_2016_Article_BFsdata201635_Fig1_HTML.jpg?as=webp)
 
-
+After the dataset is stored in FHIR format, we aim to create sequence vectors to capture timeline of events using deep neural network techniques such as LSTM and CNN, and try to answer critical questions like what are the chances of a patient to be readmitted? How long would a patient stay for a known ailment? 
+Is it possible to predict the chance of survival? 
 
 ### Data description
 The dataset used is MIMIC-III<sup>1</sup> (‘Medical Information Mart for Intensive Care’) which is a openly available 
@@ -35,17 +38,27 @@ Broadly speaking, five tables are used to define and track patient stays: ADMISS
 
 The MIMIC dataset amongst other information covers the following types of information:
 
-•Admissions
-•Discharges: details of patient leaving hospital
-•Transfers: records of the movement of patients betweencareunits and wards during their stay
-•Caregivers: details of what type of staff cared for a patientduring their hospital stay
-•Prescriptions: medication information from the hospitalcomputerized hospital order entry (CPOE) system
-•Chart information: the patient’s medical chart
-•Labevents: lab tests
-•Diagnoses: various information on diagnoses from acrossmultiple tables
-•Procedures: various information on the procedures carriedout on patients from across multiple tables
-•Patients: demographic information on patients
-•Patient notes: the patient notes recorded for each patien
+• Admissions
+
+• Discharges: details of patient leaving hospital
+
+• Transfers: records of the movement of patients betweencareunits and wards during their stay
+
+• Caregivers: details of what type of staff cared for a patientduring their hospital stay
+ 
+• Prescriptions: medication information from the hospitalcomputerized hospital order entry (CPOE) system
+
+• Chart information: the patient’s medical chart
+ 
+• Labevents: lab tests
+
+• Diagnoses: various information on diagnoses from acrossmultiple tables
+
+• Procedures: various information on the procedures carriedout on patients from across multiple tables
+
+• Patients: demographic information on patients
+
+• Patient notes: the patient notes recorded for each patien
 
 
 
