@@ -9,7 +9,13 @@ Though a vast majority of healthcare data is present in digital format but due t
 
 In order to access the MIMIC-III data a special training is required and once the training is successfully completed, an application is submitted for credentialed access. 
 
-
+A major challenge is the lack of a standard representation to store healthcare data. 
+This is mainly due to no common structure, vendors using different codes for the same medication and the information of
+a patient is spread across multiple tables.    
+Due to this a vast majority of the patients data is discarded, due to which we are converting the data in Fast Healthcare Interoperability Resources (FHIR) format.
+To standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which are 
+Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data. 
+s
 # Proposed plan of research
 The main task of the project is the creation of a data pipeline to represent a patient's history, after extensive research on restructuring the data, we understood that the Fast Healthcare Interoperability Resources (FHIR) format is a universaly accepted structure. To standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which is Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data. This enables a user to decide how the data to be structured once, then once can use special generated source code to easily write and read the structured data to and from a variety of data streams and using a variety of languages.
 
@@ -36,38 +42,19 @@ Tables prefixed with ‘D_’ are dictionary tables and provide definitions for 
 
 Broadly speaking, five tables are used to define and track patient stays: ADMISSIONS; PATIENTS; ICUSTAYS; SERVICES; and TRANSFERS. Another five tables are dictionaries for cross-referencing codes against their respective definitions: D_CPT; D_ICD_DIAGNOSES; D_ICD_PROCEDURES; D_ITEMS; and D_LABITEMS. The remaining tables contain data associated with patient care, such as physiological measurements, caregiver observations, and billing information.
 
-The MIMIC dataset amongst other information covers the following types of information:
-
-• Admissions
-
-• Discharges: details of patient leaving hospital
-
-• Transfers: records of the movement of patients betweencareunits and wards during their stay
-
-• Caregivers: details of what type of staff cared for a patientduring their hospital stay
- 
-• Prescriptions: medication information from the hospitalcomputerized hospital order entry (CPOE) system
-
-• Chart information: the patient’s medical chart
- 
-• Labevents: lab tests
-
-• Diagnoses: various information on diagnoses from acrossmultiple tables
-
-• Procedures: various information on the procedures carriedout on patients from across multiple tables
-
-• Patients: demographic information on patients
-
-• Patient notes: the patient notes recorded for each patien
-
-
-
 # Preliminary results
-1-2 paragraphs describing any preliminary results you have. At the very least,
-this should include some basic summary statistics or exploratory data analysis results from your
-dataset(s) or a pilot/preliminary dataset (if you are scraping or mining data).
+Performed basic exploratory data analysis on the admissions table to gather the summary statistics and analysis of the duration of stay.
+
+
+As the size of some of the tables is large, instead of performing analysis on the entire dataset, analysis of a particular patient id. was 
+performed. To understand the structure of the data and the relationship between the tables, the journey of a particular 
+patient was analysed. Using this a timeline of the patient was created. The timeline consist of information about every 
+admission, diagnosis, service such as ICU, transfers and discharge of a given patient. 
+![Figure 1: Patient Timeline]()
+
 
 # References
-1. Alpha.physionet.org. (2019). MIMIC-III Clinical Database v1.4. [online] Available at: https://alpha.physionet.org/content/mimiciii/1.4/ [Accessed 29 Sep. 2019].
+1. Alpha.physionet.org. (2019). MIMIC-III Clinical Database v1.4. [online] Available at: https://alpha.physionet.org/content/mimiciii/1.4/ [Accessed 28 Sep. 2019].
 2. Johnson, A., Pollard, T., Shen, L., Lehman, L., Feng, M., Ghassemi, M., Moody, B., Szolovits, P., Anthony Celi, L. and Mark, R. (2019). MIMIC-III, a freely accessible critical care database.
+3. Rajkomar, A., Oren, E., Chen, K., Dai, A., Hajaj, N., Hardt, M., Liu, P., Liu, X., Marcus, J., Sun, M., Sundberg, P., Yee, H., Zhang, K., Zhang, Y., Flores, G., Duggan, G., Irvine, J., Le, Q., Litsch, K., Mossin, A., Tansuwan, J., Wang, D., Wexler, J., Wilson, J., Ludwig, D., Volchenboum, S., Chou, K., Pearson, M., Madabushi, S., Shah, N., Butte, A., Howell, M., Cui, C., Corrado, G. and Dean, J. (2018). Scalable and accurate deep learning with electronic health records. npj Digital Medicine, 1(1).
 
