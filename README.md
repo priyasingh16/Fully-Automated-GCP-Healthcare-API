@@ -1,6 +1,6 @@
 # Patient timeline representation to model EHR data.
 Fully Automated GCP Healthcare API /Pipeline to model EHR Data using sequential modeling (with attention) for patient timeline representation of features(https://mimic.physionet.org/) [Plug and play based serverless GCP architecture for sequential model training and inference pipeline on EHR data]
-
+ 
 # Authors
 Parth Tandel, Priya Singh, Monica Mishra
 
@@ -17,6 +17,8 @@ may also include the data science tools and resources you will utilize.
 ![Figure 1: MIMIC-III critical care database](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fsdata.2016.35/MediaObjects/41597_2016_Article_BFsdata201635_Fig1_HTML.jpg?as=webp)
 
 Fast Healthcare Interoperability Resources (FHIR) format
+
+To standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which are  Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data. 
 
 ### Data description
 The dataset used is MIMIC-III<sup>1</sup> (‘Medical Information Mart for Intensive Care’) which is a openly available 
