@@ -15,7 +15,7 @@ we understood that the Fast Healthcare Interoperability Resources (FHIR) format 
  platform-neutral, extensible mechanism for serializing structured data. This enables a user to decide how the data should be structured and it can be accessed using special generated source code in a variety of languages. This allows ease of use to read and write the data from a variety of data streams.
 
 ![Figure 1: MIMIC-III critical care database](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fsdata.2016.35/MediaObjects/41597_2016_Article_BFsdata201635_Fig1_HTML.jpg?as=webp)
-Figure 1: MIMIC-III critical care database
+<center> Figure 1: MIMIC-III critical care database </center>
 
 After the dataset is stored in FHIR format, we aim to create sequence vectors to capture the timeline of events 
 using deep neural network techniques such as Long Short Term Memory (LSTM) and Convolutional Neural Network (CNN), and 
@@ -36,16 +36,16 @@ Broadly speaking, five tables are used to define and track patient stays: ADMISS
 
 # Preliminary results
 Performed basic exploratory data analysis on the admissions table to gather the summary statistics and analyzed the duration of stay.
-![Figure 2: Descriptive Statistics](https://github.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/blob/master/Assets/descriptive_statistics.png)
-Figure 2: Descriptive Statistics 
+<br />![Figure 2: Descriptive Statistics](https://github.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/blob/master/Assets/descriptive_statistics.png)
+<br /><center>Figure 2: Descriptive Statistics </center> <br />
 ![Figure 3: Histogram](https://github.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/blob/master/Assets/histogram.png)
-Figure 3: Distribution of length of stay in hospitals
+<br /><center>Figure 3: Distribution of length of stay in hospitals </center><br />
 As the size of some of the tables is too big to be loaded in local machine's memory, instead of performing analysis on the entire dataset, we analyzed an individual record in all the tables. 
 To understand the structure of the data and the relationship between the tables, the journey of a particular patient was analyzed. Using this we created a timeline of the patient's visit and health status over a long period of time.
 The timeline consists of information about every admission, diagnosis, service such as ICU, transfers, and discharge of a given patient. 
 This gives us an idea of what to capture in a sequence model for building patient's visit history.
 ![Figure 4: Patient Timeline](https://raw.githubusercontent.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/master/Assets/Patient_timeline.png)
-Figure 4: Patient Timeline
+<center> Figure 4: Patient Timeline </center>
 
 # References
 1. Alpha.physionet.org. (2019). MIMIC-III Clinical Database v1.4. [online] Available at: https://alpha.physionet.org/content/mimiciii/1.4/ [Accessed 28 Sep. 2019].
