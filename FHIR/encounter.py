@@ -13,8 +13,6 @@ class patient:
             SUBJECT_IDS.append(row["SUBJECT_ID"]) 
         return SUBJECT_IDS
 
-
-
     def getPatient(self, id):
         query_string = """
             SELECT A.ADMITTIME, A.DISCHTIME, A.SUBJECT_ID, A.HADM_ID, A.DIAGNOSIS, A.ADMISSION_LOCATION, A.ADMISSION_TYPE, 
@@ -84,9 +82,6 @@ class patient:
         for h_id in rec:
             row = rec[h_id]
 
-
-
-
             e_json = {
                 "resourceType" : "Encounter",
                 "identifier" : row["HADM_ID"],
@@ -115,7 +110,7 @@ class patient:
                 e_json["location"].append(t)
 
             encounter.append(e_json)
-
+            
         return encounter
 
 

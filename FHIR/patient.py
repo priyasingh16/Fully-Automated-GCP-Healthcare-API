@@ -81,9 +81,6 @@ class patient:
 
         return p_json
 
-
-
-
 if __name__ == "__main__":
 
     p = patient()
