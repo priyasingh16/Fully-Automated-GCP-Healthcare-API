@@ -16,70 +16,79 @@ class Procedure:
         return SUBJECT_IDS
 
     def getProcedure(self, id):
-        query_string = """SELECT * FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
+        query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
+        ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
         where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
+        print(query_string)
         results = self.cl.queryRecords(query_string)
-        res = {}
+        pprint(results)
+
+        r = []
         for row in results:
+            res = {}
             for i in row.keys():
                 if i not in res:
                     res[i] = None
 
                 if i in res and res[i] == None:
                     res[i] = row[i]
+            r.append(res)
 
-        # pprint(res)
-        p_json = {
-                 "resourceType": "Procedure",
-                  "instantiatesCanonical" : None,
-                  "instantiatesUri": None,
-                  "basedOn": None,
-                  "partOf": None,
-                  "statusReason": None,
-                  "category" : None,
-                  "code" : None,
-                  "subject" : res['SUBJECT_ID'],
-                  "encounter" : res['HADM_ID'],
-                  "performedDateTime" : str(res['STARTTIME']),
-                  "performedPeriod" : round(abs(res['ENDTIME'] - res['STARTTIME']).seconds/3600, 2),
-                  "performedString": res['ORDERCATEGORYNAME'],
-                  "performedAge": None,
-                  "performedRange": str(res['STARTTIME']) + " - " + str(res['ENDTIME']),
-                  "recorder": None,
-                  "asserter": None,
-                  "performer":[],
-                  "location" : None, # TODO
-                  "reasonCode" : None,
-                  "reasonReference": None,
-                  "bodySite": res['LOCATION'],
-                  "outcome" : None,
-                  "report" : None,
-                  "complication" : None,
-                  "complicationDetail" : None,
-                  "followUp" : None,
-                  "note" : None,
-                  "focalDevice" : None,
-                   "action" :None,
-                   "manipulated" : None,
-                  "usedReference" : res['ITEMID'] ,
-                  "usedCode" : None
-                }
+        procedures_res = []
+        for res in r:
+            p_json = {
+                "resourceType": "Procedure",
+                "instantiatesCanonical" : None,
+                "instantiatesUri": None,
+                "basedOn": None,
+                "partOf": None,
+                "statusReason": None,
+                "category" : None,
+                "code" : None,
+                "subject" : res['SUBJECT_ID'],
+                "encounter" : res['HADM_ID'],
+                "performedDateTime" : str(res['STARTTIME']),
+                "performedPeriod" : round(abs(res['ENDTIME'] - res['STARTTIME']).seconds/3600, 2),
+                "performedString": res['ORDERCATEGORYNAME'],
+                "performedAge": None,
+                "performedRange": str(res['STARTTIME']) + " - " + str(res['ENDTIME']),
+                "recorder": None,
+                "asserter": None,
+                "performer":[],
+                "location" : None, # TODO
+                "reasonCode" : None,
+                "reasonReference": None,
+                "bodySite": res['LOCATION'],
+                "outcome" : None,
+                "report" : None,
+                "complication" : None,
+                "complicationDetail" : None,
+                "followUp" : None,
+                "note" : None,
+                "focalDevice" : None,
+                "action" :None,
+                "manipulated" : None,
+                "usedReference" : res['ITEMID'] ,
+                "usedCode" : None
+            }
 
-        if res['STATUSDESCRIPTION'].lower() == "Stopped":
-            p_json["status"] = "stopped"
-        elif res['STATUSDESCRIPTION'].lower() == "FinishedRunning":
-            p_json["status"] = "completed"
-        elif res['STATUSDESCRIPTION'] == "Paused":
-            p_json["status"] = "on-hold"
-        elif res['STATUSDESCRIPTION'] == "Rewritten":
-            p_json["status"] = "not-done"
+            if res['STATUSDESCRIPTION'].lower() == "Stopped":
+                p_json["status"] = "stopped"
+            elif res['STATUSDESCRIPTION'].lower() == "FinishedRunning":
+                p_json["status"] = "completed"
+            elif res['STATUSDESCRIPTION'] == "Paused":
+                p_json["status"] = "on-hold"
+            elif res['STATUSDESCRIPTION'] == "Rewritten":
+                p_json["status"] = "not-done"
 
-        return p_json
+            procedures_res.append(p_json)
+        return procedures_res
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 #
-#     p = Procedure()
-#     pprint(p.getProcedure(29070))
+    p = Procedure()
+    for id in p.all_patient():
+        pprint(p.getProcedure(id))
