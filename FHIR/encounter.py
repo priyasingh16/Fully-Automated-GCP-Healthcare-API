@@ -1,7 +1,7 @@
 from client import client
 from pprint import pprint
 
-class patient:
+class Encounter:
     def __init__(self):
         self.cl = client()
 
@@ -13,7 +13,7 @@ class patient:
             SUBJECT_IDS.append(row["SUBJECT_ID"]) 
         return SUBJECT_IDS
 
-    def getPatient(self, id):
+    def getEncounter(self, id):
         query_string = """
             SELECT A.ADMITTIME, A.DISCHTIME, A.SUBJECT_ID, A.HADM_ID, A.DIAGNOSIS, A.ADMISSION_LOCATION, A.ADMISSION_TYPE, 
             D.SEQ_NUM, D.ICD9_CODE, D_ICD.SHORT_TITLE, D_ICD.LONG_TITLE  
@@ -23,7 +23,7 @@ class patient:
             where A.SUBJECT_ID = {}
             ORDER BY HADM_ID, SEQ_NUM
             """
-        query_string = query_string.format(id)        
+        query_string = query_string.format(id)
         results = self.cl.queryRecords(query_string)
         rec = {}
 
@@ -61,7 +61,7 @@ class patient:
             where HADM_ID = {}
             order by INTIME
             """
-            query_string = query_string.format(h_id)        
+            query_string = query_string.format(h_id)
             results = self.cl.queryRecords(query_string)
 
             for row in results:
@@ -90,7 +90,7 @@ class patient:
                 "subject" : row["SUBJECT_ID"],
                 "period" : str(row["ADMITTIME"]) + " - " + str(row["DISCHTIME"]),
                 "length" : (row["DISCHTIME"] - row["ADMITTIME"]).seconds/3600,
-                "reasonCode" : row["DIAGNOSIS"],    
+                "reasonCode" : row["DIAGNOSIS"],
             }
 
             e_json["diagnosis"] = []
@@ -110,7 +110,7 @@ class patient:
                 e_json["location"].append(t)
 
             encounter.append(e_json)
-            
+
         return encounter
 
 
@@ -118,6 +118,6 @@ class patient:
 
 if __name__ == "__main__":
 
-    p = patient()
-    all_patient = p.allPatient()
-    pprint(p.getPatient(36))
+    p = Encounter()
+    for id in p.all_patient():
+        pprint(p.getEncounter(id))
