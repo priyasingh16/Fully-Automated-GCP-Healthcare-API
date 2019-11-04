@@ -34,33 +34,32 @@ class DiagnosticReport:
 
         for res in r:
             r_json = {
-                    "resourceType" : "DiagnosticReport",
-                    "identifier" : res["ROW_ID"], # Business identifier for report
-                    "basedOn" : None, # What was requested [{ Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ServiceRequest) }]
-                    "status" : "registered", # R!  registered | partial | preliminary | final +
-                    "category" : res["CATEGORY"], # Service category
-                    "code" :  res["DESCRIPTION"], # R!  Name/Code for this diagnostic report
-                    "subject" : res["SUBJECT_ID"], # The subject of the report - usually, but not always, the patient
-                    "encounter" : res["HADM_ID"], # Health care event when test ordered
-                    # effective[x]: Clinically relevant time/time-period for report. One of these 2:
-                    "effectiveDateTime" : None,
-                    "effectivePeriod" : None,
-                    "issued" : res["CHARTDATE"], # DateTime this version was made
-                    "performer" : None, # Responsible Diagnostic Service
-                    "resultsInterpreter" : None, # Primary result interpreter
-                    "specimen" : None, # Specimens this report is based on
-                    "result" : None, # Observations
-                    "imagingStudy" : None, # Reference to full details of imaging associated with the diagnostic report
-                    "media" : [{ # Key images associated with this report
-                        "comment" : None, # Comment about the image (e.g. explanation)
-                        "link" : None # R!  Reference to the image source
-                    }],
-                    "conclusion" : None, # Clinical conclusion (interpretation) of test results
-                    "conclusionCode" : None, # Codes for the clinical conclusion of test results
-                    "presentedForm" : res["TEXT"] # Entire report as issued
+                "resourceType" : "DiagnosticReport",
+                "identifier" : res["ROW_ID"], # Business identifier for report
+                "basedOn" : None, # What was requested [{ Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ServiceRequest) }]
+                "status" : "registered", # R!  registered | partial | preliminary | final +
+                "category" : res["CATEGORY"], # Service category
+                "code" :  res["DESCRIPTION"], # R!  Name/Code for this diagnostic report
+                "subject" : res["SUBJECT_ID"], # The subject of the report - usually, but not always, the patient
+                "encounter" : res["HADM_ID"], # Health care event when test ordered
+                # effective[x]: Clinically relevant time/time-period for report. One of these 2:
+                "effectiveDateTime" : None,
+                "effectivePeriod" : None,
+                "issued" : res["CHARTDATE"], # DateTime this version was made
+                "performer" : None, # Responsible Diagnostic Service
+                "resultsInterpreter" : None, # Primary result interpreter
+                "specimen" : None, # Specimens this report is based on
+                "result" : None, # Observations
+                "imagingStudy" : None, # Reference to full details of imaging associated with the diagnostic report
+                "media" : [{ # Key images associated with this report
+                    "comment" : None, # Comment about the image (e.g. explanation)
+                    "link" : None # R!  Reference to the image source
+                }],
+                "conclusion" : None, # Clinical conclusion (interpretation) of test results
+                "conclusionCode" : None, # Codes for the clinical conclusion of test results
+                "presentedForm" : res["TEXT"] # Entire report as issued
             }
-
-        report_res.append(r_json)
+            report_res.append(r_json)
         return report_res
 
 
