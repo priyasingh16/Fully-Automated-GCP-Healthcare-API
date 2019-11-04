@@ -82,5 +82,5 @@ class MedicationDispense:
 if __name__ == "__main__":
 #
     p = MedicationDispense()
-    # for id in p.all_patient():
-    pprint(p.get_medication_dispense(61))
+    for id in p.all_patient():
+        pprint(p.get_medication_dispense(id))
