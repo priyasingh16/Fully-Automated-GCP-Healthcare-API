@@ -1,5 +1,4 @@
 from google.cloud import bigquery
-import os
 
 class client:
     def __init__(self):

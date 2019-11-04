@@ -1,4 +1,6 @@
 from client import client
+from storageClient import DatastoreClient
+
 from pprint import pprint
 
 class patient:
@@ -84,6 +86,7 @@ class patient:
 if __name__ == "__main__":
 
     p = patient()
+    d = DatastoreClient()
     all_patient = p.allPatient()
     for id in all_patient:
-        pprint(p.getPatient(id))
+        d.insertData("patient", str(id),p.getPatient(id))
