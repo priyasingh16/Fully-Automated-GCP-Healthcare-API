@@ -26,7 +26,7 @@ class Procedure:
         Returns
         ----------
         procedures_res : list
-            list of procedures performed on a patient in all his visit to the hospital.
+            list of procedures performed on a patient in all visits to the hospital.
         """
 
         query_string = """SELECT SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
