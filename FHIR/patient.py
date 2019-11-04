@@ -78,8 +78,8 @@ class patient:
         p_json["deceasedBoolean"] = 0
         p_json["deceasedDateTime"] = None 
         if res["DOD"] != None:
-            p_json["deceasedBoolean"] : 1
-            p_json["deceasedDateTime"] : res["DEATHTIME"]
+            p_json["deceasedBoolean"] = 1
+            p_json["deceasedDateTime"] = res["DEATHTIME"]
 
         return p_json
 
