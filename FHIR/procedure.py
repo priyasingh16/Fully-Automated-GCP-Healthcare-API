@@ -7,7 +7,7 @@ class Procedure:
     def __init__(self):
         self.cl = client()
 
-    def allPatient(self):
+    def all_patient(self):
         query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
         results = self.cl.queryRecords(query_string)
         SUBJECT_IDS = []
@@ -15,8 +15,8 @@ class Procedure:
             SUBJECT_IDS.append(row["SUBJECT_ID"])
         return SUBJECT_IDS
 
-    def getProcedure(self, id):
-        query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
+    def get_procedure(self, id):
+        query_string = """SELECT SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
         ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
         where SUBJECT_ID = {};"""
 
@@ -34,7 +34,9 @@ class Procedure:
 
                 if i in res and res[i] == None:
                     res[i] = row[i]
+
             r.append(res)
+        pprint(r)
 
         procedures_res = []
         for res in r:
@@ -43,7 +45,7 @@ class Procedure:
                 "instantiatesCanonical" : None,
                 "instantiatesUri": None,
                 "basedOn": None,
-                "partOf": None,
+                "partOf": res['ICUSTAY_ID'],
                 "statusReason": None,
                 "category" : None,
                 "code" : None,
@@ -74,9 +76,9 @@ class Procedure:
                 "usedCode" : None
             }
 
-            if res['STATUSDESCRIPTION'].lower() == "Stopped":
+            if res['STATUSDESCRIPTION']== "Stopped":
                 p_json["status"] = "stopped"
-            elif res['STATUSDESCRIPTION'].lower() == "FinishedRunning":
+            elif res['STATUSDESCRIPTION'] == "FinishedRunning":
                 p_json["status"] = "completed"
             elif res['STATUSDESCRIPTION'] == "Paused":
                 p_json["status"] = "on-hold"
@@ -91,4 +93,4 @@ if __name__ == "__main__":
 #
     p = Procedure()
     for id in p.all_patient():
-        pprint(p.getProcedure(id))
+        p.get_procedure(id)
