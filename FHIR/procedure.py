@@ -3,25 +3,40 @@ from pprint import pprint
 
 
 class Procedure:
-    # Procedure start and stop times recorded for MetaVision patients.
+    """
+    Description
+    -----------
+    Procedures perfromed in a particular patient.
+    """
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
+
         self.cl = client()
 
-    def all_patient(self):
-        query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
-        results = self.cl.queryRecords(query_string)
-        SUBJECT_IDS = []
-        for row in results:
-            SUBJECT_IDS.append(row["SUBJECT_ID"])
-        return SUBJECT_IDS
-
     def get_procedure(self, id):
+        """
+        Description
+        -----------
+        Extracts Information about all procedure performed of a patient in the hospital.
+        Parameters
+        ----------
+        id : Integer
+            Subject id of the patient to fetch prescription record.
+        Returns
+        ----------
+        procedures_res : list
+            list of procedures performed on a patient in all his visit to the hospital.
+        """
+
         query_string = """SELECT SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
         ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
         where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
-        print(query_string)
         results = self.cl.queryRecords(query_string)
         pprint(results)
 
@@ -40,7 +55,7 @@ class Procedure:
 
         procedures_res = []
         for res in r:
-            p_json = {
+            procedure_json = {
                 "resourceType": "Procedure",
                 "instantiatesCanonical" : None,
                 "instantiatesUri": None,
@@ -77,20 +92,13 @@ class Procedure:
             }
 
             if res['STATUSDESCRIPTION']== "Stopped":
-                p_json["status"] = "stopped"
+                procedure_json["status"] = "stopped"
             elif res['STATUSDESCRIPTION'] == "FinishedRunning":
-                p_json["status"] = "completed"
+                procedure_json["status"] = "completed"
             elif res['STATUSDESCRIPTION'] == "Paused":
-                p_json["status"] = "on-hold"
+                procedure_json["status"] = "on-hold"
             elif res['STATUSDESCRIPTION'] == "Rewritten":
-                p_json["status"] = "not-done"
+                procedure_json["status"] = "not-done"
 
-            procedures_res.append(p_json)
+            procedures_res.append(procedure_json)
         return procedures_res
-
-
-if __name__ == "__main__":
-#
-    p = Procedure()
-    for id in p.all_patient():
-        p.get_procedure(id)
