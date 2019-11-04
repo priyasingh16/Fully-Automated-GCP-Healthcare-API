@@ -35,7 +35,7 @@ class Procedure:
                 if i in res and res[i] == None:
                     res[i] = row[i]
 
-            r.append(res)gt
+            r.append(res)
         pprint(r)
 
         procedures_res = []
@@ -92,5 +92,5 @@ class Procedure:
 if __name__ == "__main__":
 #
     p = Procedure()
-    # for id in p.all_patient():
-    p.get_procedure(36)
+    for id in p.all_patient():
+        p.get_procedure(id)
