@@ -5,7 +5,7 @@ class Encounter:
     def __init__(self):
         self.cl = client()
 
-    def allPatient(self):
+    def all_patient(self):
         query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
         results = self.cl.queryRecords(query_string)
         SUBJECT_IDS = []
@@ -13,7 +13,7 @@ class Encounter:
             SUBJECT_IDS.append(row["SUBJECT_ID"]) 
         return SUBJECT_IDS
 
-    def getEncounter(self, id):
+    def get_encounter(self, id):
         query_string = """
             SELECT A.ADMITTIME, A.DISCHTIME, A.SUBJECT_ID, A.HADM_ID, A.DIAGNOSIS, A.ADMISSION_LOCATION, A.ADMISSION_TYPE, 
             D.SEQ_NUM, D.ICD9_CODE, D_ICD.SHORT_TITLE, D_ICD.LONG_TITLE  
@@ -120,4 +120,4 @@ if __name__ == "__main__":
 
     p = Encounter()
     for id in p.all_patient():
-        pprint(p.getEncounter(id))
+        pprint(p.get_encounter(id))
