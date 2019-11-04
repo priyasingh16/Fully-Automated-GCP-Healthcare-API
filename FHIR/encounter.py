@@ -30,7 +30,7 @@ class Encounter:
         ----------
         encounter : list
             list of dicts which contains information about patients each visit to the hospital.
-            "'identifier' is the unique id which coresponds to each visit"
+            'identifier' is the unique id which coresponds to each visit
         """
         query_string = """
             SELECT A.ADMITTIME, A.DISCHTIME, A.SUBJECT_ID, A.HADM_ID, A.DIAGNOSIS, A.ADMISSION_LOCATION, A.ADMISSION_TYPE, 

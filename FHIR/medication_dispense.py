@@ -3,19 +3,34 @@ from pprint import pprint
 
 
 class MedicationDispense:
-    # Procedure start and stop times recorded for MetaVision patients.
+    """
+    Description
+    -----------
+    Get relevent medication information about a particular patient.
+    """
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
         self.cl = client()
 
-    def all_patient(self):
-        query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
-        results = self.cl.queryRecords(query_string)
-        SUBJECT_IDS = []
-        for row in results:
-            SUBJECT_IDS.append(row["SUBJECT_ID"])
-        return SUBJECT_IDS
-
     def get_medication_dispense(self, id):
+        """
+        Description
+        -----------
+        Extracts Information about all medication information of a patient given subject id.
+        Parameters
+        ----------
+        id : Integer
+            Subject id of the coresponding patient.
+        Returns
+        ----------
+        encounter : list
+            list of dicts which contains Medication information about patients for every visit to the hospital.
+        """
+
         query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, ICUSTAY_ID, STARTDATE, ENDDATE, DRUG_TYPE, DRUG, 
         DRUG_NAME_GENERIC, NDC, PROD_STRENGTH, FORM_VAL_DISP, FORM_UNIT_DISP, ROUTE
         FROM `green-gasket-256323.mimiciii_fullyautomated.PRESCRIPTIONS`
@@ -40,47 +55,40 @@ class MedicationDispense:
 
         medication_res = []
         for res in r:
-            p_json = {
-          "resourceType" : "MedicationDispense",
+            medication_info = {
+                "resourceType" : "MedicationDispense",
 
-          "identifier" : res['ROW_ID'],
-          "partOf" : res['ICUSTAY_ID'],
-          "status" : None,
+                "identifier" : res['ROW_ID'],
+                "partOf" : res['ICUSTAY_ID'],
+                "status" : None,
 
-          "statusReasonCodeableConcept" : None,
-          "statusReasonReference" : None,
-          "category" : res['DRUG_TYPE'],
-          "medicationCodeableConcept" :res['DRUG_NAME_GENERIC'],
-          "medicationReference" : res['NDC'],
-          "subject" : res['SUBJECT_ID'],
-          "context" : res['HADM_ID'],
-          "supportingInformation" : None,
-          "performer" : [{
-            "function" : None,
-            "actor" : res['HADM_ID']
-          }],
-          "location" : None,
-          "authorizingPrescription" : None,
-          "type" : None,
-          "quantity" : res['FORM_VAL_DISP'],
-          "daysSupply" : round(abs(res['ENDDATE'] - res['STARTDATE']).seconds/86400, 2),
-          "whenPrepared" : str(res['STARTDATE']),
-          "whenHandedOver" : None,
-          "destination" : None,
-          "receiver" : None,
-          "note" : res['DRUG'] + " " + res['FORM_VAL_DISP']	+ " " + res['FORM_UNIT_DISP'],
-          "dosageInstruction" : res['ROUTE'],
-          "substitution" : None,
-          "detectedIssue" : None,
-          "eventHistory" : None
-        }
+                "statusReasonCodeableConcept" : None,
+                "statusReasonReference" : None,
+                "category" : res['DRUG_TYPE'],
+                "medicationCodeableConcept" :res['DRUG_NAME_GENERIC'],
+                "medicationReference" : res['NDC'],
+                "subject" : res['SUBJECT_ID'],
+                "context" : res['HADM_ID'],
+                "supportingInformation" : None,
+                "performer" : [{
+                    "function" : None,
+                    "actor" : res['HADM_ID']
+                }],
+                "location" : None,
+                "authorizingPrescription" : None,
+                "type" : None,
+                "quantity" : res['FORM_VAL_DISP'],
+                "daysSupply" : round(abs(res['ENDDATE'] - res['STARTDATE']).seconds/86400, 2),
+                "whenPrepared" : str(res['STARTDATE']),
+                "whenHandedOver" : None,
+                "destination" : None,
+                "receiver" : None,
+                "note" : res['DRUG'] + " " + res['FORM_VAL_DISP']	+ " " + res['FORM_UNIT_DISP'],
+                "dosageInstruction" : res['ROUTE'],
+                "substitution" : None,
+                "detectedIssue" : None,
+                "eventHistory" : None
+            }
 
-            medication_res.append(p_json)
+            medication_res.append(medication_info)
         return medication_res
-
-
-if __name__ == "__main__":
-#
-    p = MedicationDispense()
-    for id in p.all_patient():
-        pprint(p.get_medication_dispense(id))
