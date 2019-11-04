@@ -89,4 +89,4 @@ if __name__ == "__main__":
     d = DatastoreClient()
     all_patient = p.all_patient()
     for id in all_patient:
-        d.insertData("patient", str(id),p.getPatient(id))
+        d.insertData("patient", str(id),p.get_patient(id))
