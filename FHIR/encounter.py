@@ -1,19 +1,37 @@
 from client import client
-from pprint import pprint
 
 class Encounter:
+    """
+    Description
+    -----------
+    The class deals with etl script transforming patient hospital visit data
+    from mimic3 tables to FHIR accepted format.
+    """
+
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
         self.cl = client()
 
-    def all_patient(self):
-        query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
-        results = self.cl.queryRecords(query_string)
-        SUBJECT_IDS = []
-        for row in results:
-            SUBJECT_IDS.append(row["SUBJECT_ID"]) 
-        return SUBJECT_IDS
-
     def get_encounter(self, id):
+        """
+        Description
+        -----------
+        Extracts Information about all visit of patient in hospital
+        distinguished using HADM_ID given subject id.
+        Parameters
+        ----------
+        id : Integer
+            Subject id of the coresponding patient.
+        Returns
+        ----------
+        encounter : list
+            list of dicts which contains information about patients each visit to the hospital.
+            "'identifier' is the unique id which coresponds to each visit"
+        """
         query_string = """
             SELECT A.ADMITTIME, A.DISCHTIME, A.SUBJECT_ID, A.HADM_ID, A.DIAGNOSIS, A.ADMISSION_LOCATION, A.ADMISSION_TYPE, 
             D.SEQ_NUM, D.ICD9_CODE, D_ICD.SHORT_TITLE, D_ICD.LONG_TITLE  
@@ -77,7 +95,6 @@ class Encounter:
                 t["LOS"] = row["LOS"]
                 t["OUTTIME"] = row["OUTTIME"]
                 rec[h_id]["TRANSFERS"].append(t)
-        pprint(rec)
         encounter = []
         for h_id in rec:
             row = rec[h_id]
@@ -112,12 +129,3 @@ class Encounter:
             encounter.append(e_json)
 
         return encounter
-
-
-
-
-if __name__ == "__main__":
-
-    p = Encounter()
-    for id in p.all_patient():
-        pprint(p.get_encounter(id))

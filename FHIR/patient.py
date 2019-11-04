@@ -1,7 +1,7 @@
 from client import client
 from pprint import pprint
 
-class patient:
+class Patient:
     """
     Description
     -----------
@@ -36,7 +36,6 @@ class patient:
         return SUBJECT_IDS
 
     def get_patient(self, id):
-
         """
         Description
         -----------
