@@ -108,9 +108,6 @@ class Observations:
 
 
 if __name__ == "__main__":
-#
     r = Observations()
     for id in r.all_patient():
         observation_res = r.get_observations(id)
-        if id > 36:
-            print(observation_res)
