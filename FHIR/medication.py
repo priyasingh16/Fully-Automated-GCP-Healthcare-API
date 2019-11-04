@@ -7,7 +7,7 @@ class Medication:
     def __init__(self):
         self.cl = client()
 
-    def allPatient(self):
+    def all_patient(self):
         query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
         results = self.cl.queryRecords(query_string)
         SUBJECT_IDS = []
@@ -17,13 +17,12 @@ class Medication:
 
     def get_medication(self, id):
         query_string = """SELECT DRUG_NAME_GENERIC, FORMULARY_DRUG_CD, NDC, PROD_STRENGTH, 
-        FORM_VAL_DISP, FORM_UNIT_DISP FROM `green-gasket-256323.mimiciii_fullyautomated.PRESCRIPTIONS`
+        DOSE_VAL_RX, FORM_UNIT_DISP FROM `green-gasket-256323.mimiciii_fullyautomated.PRESCRIPTIONS`
         where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
         print(query_string)
         results = self.cl.queryRecords(query_string)
-        # pprint(results)
 
         r = []
         for row in results:
@@ -36,7 +35,7 @@ class Medication:
                     res[i] = row[i]
 
             r.append(res)
-        pprint(r)
+
 
         medication_res = []
         for res in r:
@@ -47,7 +46,7 @@ class Medication:
           "status" : None,
           "manufacturer" : None,
           "form" : res['FORM_UNIT_DISP'],
-          "amount" : res['FORM_VAL_DISP'],
+          "amount" : res['DOSE_VAL_RX'],
           "ingredient" : [{
             "itemCodeableConcept" : res['FORMULARY_DRUG_CD'],
             "itemReference" : res['DRUG_NAME_GENERIC'],
@@ -64,6 +63,5 @@ class Medication:
 if __name__ == "__main__":
 #
     p = Medication()
-    p = Medication()
-    # for id in p.all_patient():
-    pprint(p.get_medication(61))
+    for id in p.all_patient():
+        pprint(p.get_medication(id))

@@ -13,7 +13,7 @@ class patient:
             SUBJECT_IDS.append(row["SUBJECT_ID"]) 
         return SUBJECT_IDS
 
-    def getPatient(self, id):
+    def get_patient(self, id):
         query_string = """SELECT P.*, A.HADM_ID,  A.INSURANCE, A.LANGUAGE, A.RELIGION, A.MARITAL_STATUS, A.ETHNICITY, A.DEATHTIME from 
         `green-gasket-256323.mimiciii_fullyautomated.PATIENTS` as P 
         left join `green-gasket-256323.mimiciii_fullyautomated.ADMISSIONS` as A on P.SUBJECT_ID=A.SUBJECT_ID
