@@ -45,7 +45,7 @@ class Procedure:
                 "instantiatesCanonical" : None,
                 "instantiatesUri": None,
                 "basedOn": None,
-                "partOf": None,
+                "partOf": res['ICUSTAY_ID'],
                 "statusReason": None,
                 "category" : None,
                 "code" : None,
