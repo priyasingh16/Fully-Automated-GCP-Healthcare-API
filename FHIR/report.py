@@ -27,7 +27,7 @@ class DiagnosticReport:
         Returns
         ----------
         procedures_res : list
-            list of all diagnostic information of a patient in all his visit to the hospital.
+            list of all diagnostic information of a patient in all visits to the hospital.
         """
 
         query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, CHARTDATE, CHARTTIME, STORETIME, 

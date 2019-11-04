@@ -7,6 +7,7 @@ from medication import Medication
 from medication_dispense import MedicationDispense
 from report import DiagnosticReport
 from procedure import Procedure
+from observations import Observations
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='logs/app.log',level=logging.INFO)
 
@@ -16,6 +17,7 @@ if __name__ == "__main__":
     p = Patient()
     e = Encounter()
     m = Medication()
+    o = Observations()
     dr = DiagnosticReport()
     md = MedicationDispense()
     pr = Procedure()
@@ -27,11 +29,10 @@ if __name__ == "__main__":
         print(p.get_patient(id))
         print(e.get_encounter(id))
         print(m.get_medication(id))
+        print(o.get_observations(id))
         print(md.get_medication_dispense(id))
         print(dr.get_diagnostic_report(id))
         print(pr.get_procedure(id))
-
-
         end = time.time()
 
         logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(end))

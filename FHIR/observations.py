@@ -3,26 +3,42 @@ from pprint import pprint
 
 
 class Observations:
+    """
+    Description
+    -----------
+    Observation for a patient's visit to the hospital.
+    """
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
         self.cl = client()
 
-    def all_patient(self):
-        query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
-        results = self.cl.queryRecords(query_string)
-        SUBJECT_IDS = []
-        for row in results:
-            SUBJECT_IDS.append(row["SUBJECT_ID"])
-        return SUBJECT_IDS
-
     def get_observations(self, id):
+        """
+        Description
+        -----------
+        Extracts observation of a patient in the hospital visits.
+        Parameters
+        ----------
+        id : Integer
+            Subject id of the patient to fetch prescription record.
+        Returns
+        ----------
+        procedures_res : list
+            list of all the observation for a patient in all visit to the hospital.
+        """
+
         query_string = """SELECT L.SUBJECT_ID, L.HADM_ID, L.ITEMID, COUNT(L.ITEMID) as TOTAL_ITEMCOUNT, COUNT(L.FLAG) AS TOTAL_ABNORMAL, 
-        MAX(DL.LABEL) AS LABEL, MAX(DL.FLUID) AS SPECIMEN, MAX(DL.CATEGORY) AS CATEGORY FROM `green-gasket-256323.mimiciii_fullyautomated.LABEVENTS` AS L 
-        JOIN `green-gasket-256323.mimiciii_fullyautomated.D_LABITEMS` AS DL ON L.ITEMID = DL.ITEMID WHERE HADM_ID IS NOT NULL AND SUBJECT_ID = {} 
-        GROUP BY SUBJECT_ID, HADM_ID, ITEMID;"""
+            MAX(DL.LABEL) AS LABEL, MAX(DL.FLUID) AS SPECIMEN, MAX(DL.CATEGORY) AS CATEGORY FROM `green-gasket-256323.mimiciii_fullyautomated.LABEVENTS` AS L 
+            JOIN `green-gasket-256323.mimiciii_fullyautomated.D_LABITEMS` AS DL ON L.ITEMID = DL.ITEMID WHERE HADM_ID IS NOT NULL AND SUBJECT_ID = {} 
+            GROUP BY SUBJECT_ID, HADM_ID, ITEMID;"""
         query_string = query_string.format(id)
         results = self.cl.queryRecords(query_string)
 
-        o = []
+        patient_observation = []
         for row in results:
             res = {}
             for i in row.keys():
@@ -30,12 +46,12 @@ class Observations:
                     res[i] = None
                 if i in res and res[i] == None:
                     res[i] = row[i]
-            o.append(res)
+            patient_observation.append(res)
         
-        observation_res = []
+        patient_observation_res = []
 
-        for res in o:
-            o_json = {
+        for res in patient_observation:
+            observation_json = {
                 "resourceType" : "Observation",
                 # from Resource: id, meta, implicitRules, and language
                 # from DomainResource: text, contained, extension, and modifierExtension
@@ -103,11 +119,5 @@ class Observations:
                     "referenceRange" : None # Provides guide for interpretation of component result
                 }]
             }
-            observation_res.append(o_json)
-        return observation_res
-
-
-if __name__ == "__main__":
-    r = Observations()
-    for id in r.all_patient():
-        observation_res = r.get_observations(id)
+            patient_observation_res.append(observation_json)
+        return patient_observation_res
