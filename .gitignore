@@ -1,0 +1,5 @@
+mimic-iii-clinical-database-1.4/*
+*.pyc
+__pycache__/*
+logs
+.gitignore
