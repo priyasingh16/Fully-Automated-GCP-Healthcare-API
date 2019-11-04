@@ -5,7 +5,7 @@ class patient:
     def __init__(self):
         self.cl = client()
 
-    def allPatient(self):
+    def all_patient(self):
         query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
         results = self.cl.queryRecords(query_string)
         SUBJECT_IDS = []
