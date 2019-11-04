@@ -76,5 +76,5 @@ class DiagnosticReport:
                     "presentedForm" : res["TEXT"] # Entire report as issued
             }
 
-        report_res.append(report_json)
+            report_res.append(report_json)
         return report_res
