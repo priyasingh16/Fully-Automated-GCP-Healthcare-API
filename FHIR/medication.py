@@ -1,6 +1,4 @@
 from client import client
-from pprint import pprint
-
 
 class Medication:
     """
@@ -34,8 +32,8 @@ class Medication:
         """
 
         query_string = """SELECT DRUG_NAME_GENERIC, FORMULARY_DRUG_CD, NDC, PROD_STRENGTH, 
-        DOSE_VAL_RX, FORM_UNIT_DISP FROM `green-gasket-256323.mimiciii_fullyautomated.PRESCRIPTIONS`
-        where SUBJECT_ID = {};"""
+            DOSE_VAL_RX, FORM_UNIT_DISP FROM `green-gasket-256323.mimiciii_fullyautomated.PRESCRIPTIONS`
+            where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
         results = self.cl.queryRecords(query_string)

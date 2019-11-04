@@ -75,9 +75,9 @@ class Encounter:
 
         for h_id in rec.keys():
             query_string = """
-            SELECT *  FROM `green-gasket-256323.mimiciii_fullyautomated.TRANSFERS`
-            where HADM_ID = {}
-            order by INTIME
+                SELECT *  FROM `green-gasket-256323.mimiciii_fullyautomated.TRANSFERS`
+                where HADM_ID = {}
+                order by INTIME
             """
             query_string = query_string.format(h_id)
             results = self.cl.queryRecords(query_string)

@@ -1,5 +1,4 @@
 from client import client
-from pprint import pprint
 
 class Patient:
     """

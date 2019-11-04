@@ -1,6 +1,4 @@
 from client import client
-from pprint import pprint
-
 
 class Procedure:
     """
@@ -14,7 +12,6 @@ class Procedure:
         -----------
         Initializes google cloud big query client to query FHIR data.
         """
-
         self.cl = client()
 
     def get_procedure(self, id):
@@ -33,13 +30,11 @@ class Procedure:
         """
 
         query_string = """SELECT SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
-        ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
-        where SUBJECT_ID = {};"""
+            ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
+            where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
         results = self.cl.queryRecords(query_string)
-        pprint(results)
-
         r = []
         for row in results:
             res = {}
@@ -51,8 +46,6 @@ class Procedure:
                     res[i] = row[i]
 
             r.append(res)
-        pprint(r)
-
         procedures_res = []
         for res in r:
             procedure_json = {

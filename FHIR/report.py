@@ -1,22 +1,38 @@
 from client import client
-from pprint import pprint
-
 
 class DiagnosticReport:
+    """
+    Description
+    -----------
+    Get relevent Diagnostics information about a particular patient.
+    """
+
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
         self.cl = client()
 
-    def all_patient(self):
-        query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
-        results = self.cl.queryRecords(query_string)
-        SUBJECT_IDS = []
-        for row in results:
-            SUBJECT_IDS.append(row["SUBJECT_ID"])
-        return SUBJECT_IDS
-
     def get_diagnostic_report(self, id):
-        query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, CHARTDATE, CHARTTIME, STORETIME, CATEGORY, DESCRIPTION, CGID, ISERROR, TEXT  FROM `green-gasket-256323.mimiciii_fullyautomated.NOTEEVENTS` 
-        where SUBJECT_ID = {};"""
+        """
+        Description
+        -----------
+        Extracts Information about all daignosis patient in the hospital.
+        Parameters
+        ----------
+        id : Integer
+            Subject id all of the patient to fetch prescription record.
+        Returns
+        ----------
+        procedures_res : list
+            list of all diagnostic information of a patient in all his visit to the hospital.
+        """
+
+        query_string = """SELECT ROW_ID, SUBJECT_ID, HADM_ID, CHARTDATE, CHARTTIME, STORETIME, 
+            CATEGORY, DESCRIPTION, CGID, ISERROR, TEXT  FROM `green-gasket-256323.mimiciii_fullyautomated.NOTEEVENTS` 
+            where SUBJECT_ID = {};"""
         query_string = query_string.format(id)
         results = self.cl.queryRecords(query_string)
 
@@ -33,7 +49,7 @@ class DiagnosticReport:
         report_res = []
 
         for res in r:
-            r_json = {
+            report_json = {
                     "resourceType" : "DiagnosticReport",
                     "identifier" : res["ROW_ID"], # Business identifier for report
                     "basedOn" : None, # What was requested [{ Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ServiceRequest) }]
@@ -60,12 +76,5 @@ class DiagnosticReport:
                     "presentedForm" : res["TEXT"] # Entire report as issued
             }
 
-        report_res.append(r_json)
+        report_res.append(report_json)
         return report_res
-
-
-if __name__ == "__main__":
-#
-    r = DiagnosticReport()
-    for id in r.all_patient():
-        report_res = r.get_diagnostic_report(id)
