@@ -35,7 +35,7 @@ class patient:
             "active" : None,
             "name" : res["SUBJECT_ID"],
             "telecom" : None,
-            "gender" : "unknown",
+            "gender" : res['GENDER'],
             "birthDate" : res["DOB"],
             "address" : None,
             "maritalStatus" : res["MARITAL_STATUS"],
