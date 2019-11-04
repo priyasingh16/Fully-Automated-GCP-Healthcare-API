@@ -41,7 +41,7 @@ class DiagnosticReport:
                     "category" : res["CATEGORY"], # Service category
                     "code" :  res["DESCRIPTION"], # R!  Name/Code for this diagnostic report
                     "subject" : res["SUBJECT_ID"], # The subject of the report - usually, but not always, the patient
-                    "encounter" : None, # Health care event when test ordered
+                    "encounter" : res["HADM_ID"], # Health care event when test ordered
                     # effective[x]: Clinically relevant time/time-period for report. One of these 2:
                     "effectiveDateTime" : None,
                     "effectivePeriod" : None,
