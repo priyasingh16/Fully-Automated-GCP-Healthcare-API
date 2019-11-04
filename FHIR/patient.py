@@ -1,13 +1,33 @@
 from client import client
-from storageClient import DatastoreClient
-
 from pprint import pprint
 
 class patient:
+    """
+    Description
+    -----------
+    The class deals with etl script transforming patient data
+    from mimic3 tables to FHIR accepted format.
+    """
+
     def __init__(self):
+        """
+        Description
+        -----------
+        Initializes google cloud big query client to query FHIR data.
+        """
         self.cl = client()
 
     def all_patient(self):
+        """
+        Description
+        -----------
+        Extract all the unique ids given to patient and return a list of all those ids.
+        Returns
+        ----------
+        SUJECTS_IDS : list
+            list of all subjects_ids in integer format.
+        """
+
         query_string = """SELECT SUBJECT_ID from `green-gasket-256323.mimiciii_fullyautomated.PATIENTS`;"""
         results = self.cl.queryRecords(query_string)
         SUBJECT_IDS = []
@@ -16,6 +36,21 @@ class patient:
         return SUBJECT_IDS
 
     def get_patient(self, id):
+
+        """
+        Description
+        -----------
+        Extracts Information about as a single patient given subject id.
+        Parameters
+        ----------
+        id : Integer
+            Subject id of the coresponding patient.
+        Returns
+        ----------
+        patient_json : dict
+            key value pair of information relevant to the given patient id.
+        """
+
         query_string = """SELECT P.*, A.HADM_ID,  A.INSURANCE, A.LANGUAGE, A.RELIGION, A.MARITAL_STATUS, A.ETHNICITY, A.DEATHTIME from 
         `green-gasket-256323.mimiciii_fullyautomated.PATIENTS` as P 
         left join `green-gasket-256323.mimiciii_fullyautomated.ADMISSIONS` as A on P.SUBJECT_ID=A.SUBJECT_ID
@@ -31,7 +66,7 @@ class patient:
                 
                 if i in res and res[i] == None:
                     res[i] = row[i]
-        p_json = {
+        patient_json = {
             "resourceType" : "Patient",
             "identifier" : res["SUBJECT_ID"],
             "active" : None,
@@ -44,49 +79,26 @@ class patient:
             "multipleBirthBoolean" : None,
             "multipleBirthInteger" : None,
             "photo" : None,
-            "contact" : [
-            #     {
-            #     # "relationship" : None
-            #     # "name" : { HumanName }, // A name associated with the contact person
-            #     # "telecom" : [{ ContactPoint }], // A contact detail for the person
-            #     # "address" : { Address }, // Address for the contact person
-            #     # "gender" : "<code>", // male | female | other | unknown
-            #     # "organization" : { Reference(Organization) }, // C? Organization that is associated with the contact
-            #     # "period" : { Period } // The period during which this contact person or organization is valid to be contacted relating to this patient
-            # }
-            ],
+            "contact" : [],
             "communication" : [{ 
                 "language" : res["LANGUAGE"],
                 "preferred" : res["LANGUAGE"]
             }],
             "generalPractitioner" : None,
             "managingOrganization" : res["HADM_ID"],
-            "link" : [
-                # { // Link to another patient resource that concerns the same actual person
-                # "other" : { Reference(Patient|RelatedPerson) }, // R!  The other patient or related person resource that the link refers to
-                # "type" : "<code>" // R!  replaced-by | replaces | refer | seealso
-                # }
-            ]
+            "link" : []
         }
 
         if res["GENDER"].lower() == "m":
-            p_json["gender"] = "male"
+            patient_json["gender"] = "male"
         elif res["GENDER"].lower() == "f":
-            p_json["gender"] = "female"
+            patient_json["gender"] = "female"
 
 
-        p_json["deceasedBoolean"] = 0
-        p_json["deceasedDateTime"] = None 
+        patient_json["deceasedBoolean"] = 0
+        patient_json["deceasedDateTime"] = None 
         if res["DOD"] != None:
-            p_json["deceasedBoolean"] = 1
-            p_json["deceasedDateTime"] = res["DEATHTIME"]
+            patient_json["deceasedBoolean"] = 1
+            patient_json["deceasedDateTime"] = res["DEATHTIME"]
 
-        return p_json
-
-if __name__ == "__main__":
-
-    p = patient()
-    d = DatastoreClient()
-    all_patient = p.all_patient()
-    for id in all_patient:
-        d.insertData("patient", str(id),p.get_patient(id))
+        return patient_json
