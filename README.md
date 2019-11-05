@@ -99,7 +99,23 @@ corresponding information. Similarly, for Encounter resource as seen in figure 4
 <center> Figure 4: Encounter FHIR Resource </center>
 
 # References
-1. Alpha.physionet.org. (2019). MIMIC-III Clinical Database v1.4. [online] Available at: https://alpha.physionet.org/content/mimiciii/1.4/ [Accessed 28 Sep. 2019].
-2. Johnson, A., Pollard, T., Shen, L., Lehman, L., Feng, M., Ghassemi, M., Moody, B., Szolovits, P., Anthony Celi, L. and Mark, R. (2019). MIMIC-III, a freely accessible critical care database.
-3. Rajkomar, A., Oren, E., Chen, K., Dai, A., Hajaj, N., Hardt, M., Liu, P., Liu, X., Marcus, J., Sun, M., Sundberg, P., Yee, H., Zhang, K., Zhang, Y., Flores, G., Duggan, G., Irvine, J., Le, Q., Litsch, K., Mossin, A., Tansuwan, J., Wang, D., Wexler, J., Wilson, J., Ludwig, D., Volchenboum, S., Chou, K., Pearson, M., Madabushi, S., Shah, N., Butte, A., Howell, M., Cui, C., Corrado, G. and Dean, J. (2018). Scalable and accurate deep learning with electronic health records. npj Digital Medicine, 1(1).
+[1] Alpha.physionet.org. (2019). MIMIC-III
+Clinical Database v1.4. [online] Available
+at: https://alpha.physionet.org/content/mimiciii
+/1.4/ [Accessed 28 Sep. 2019].
 
+[2] Rajkomar, A., Oren, E., Chen, K., Dai, A., Hajaj,
+N., Hardt, M., Liu, P., Liu, X., Marcus, J., Sun, M.,
+Sundberg, P., Yee, H., Zhang, K., Zhang, Y., Flores,
+G., Duggan, G., Irvine, J., Le, Q., Litsch, K., Mossin,
+A., Tansuwan, J., Wang, D., Wexler, J., Wilson, J.,
+Ludwig, D., Volchenboum, S., Chou, K., Pearson,
+M., Madabushi, S., Shah, N., Butte, A., Howell,
+M., Cui, C., Corrado, G. and Dean, J. (2018).
+Scalable and accurate deep learning with
+electronic health records. npj Digital Medicine,
+1(1).
+
+[3] Anon, (2019). [online] Available at:
+https://www.hl7.org/fhir/formats.html
+[Accessed 5 Nov. 2019].
