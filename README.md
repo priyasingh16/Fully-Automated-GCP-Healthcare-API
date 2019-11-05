@@ -4,48 +4,99 @@
 Parth Tandel, Priya Singh, Monica Mishra
 
 # Summary
-Though a vast majority of healthcare data is present in digital format due to the unstructured nature (dates, notes, lab results) of the dataset, typical machine learning model are restricted to only a few variables. The MIMIC-III dataset eradicates this problem by structuring data from various sources into a set of formulated tables namely ADMISSIONS (information about patient's visits), INPUTEVENTS (readings of health monitor machines), CHARTEVENTS (record of medicines taken by patients), etc. The dataset is rich in information yet due to the immense size of tables (~50 GB), it cannot be used directly in its raw form and hence there is a need to build a pipeline. This pipeline then can be used to build a timeline of a patient's visit for data analysis or model creation. Our efforts are heavily inclined towards creating a single source dataset that captures the entire history of a patient which advertently makes training an ML model straightforward.
- 
-To access the MIMIC-III data a special training is required and once the training is completed, an application is submitted for credentialed access.
+The large volume of healthcare records is difficult to use directly given their complicated relational structure with a wide variety of variables, for instance, the timing of a visit to a
+hospital, services performed during the stay,
+initial diagnosis by the primary caregiver, lab
+reports, etc. As the information is scattered
+across various tables, any machine learning
+algorithm is forced to utilize only a subset of
+features from the dataset. The MIMIC-III<sup>1</sup>
+dataset contains tables namely ADMISSIONS
+(information about patient visits), INPUTEVENTS
+(readings of health monitor machines),
+CHARTEVENTS (record of medicines taken by
+patients), etc. This dataset contains records of
+adult patients (aged 16 years or above) admitted
+to critical care units between 2001 and 2012.
+The dataset is rich in information yet due to
+the immense size of tables (~50 GB), it cannot be
+used directly to predict the length of stay or the
+readmission chance of a patient. The proposed
+solution to this problem is the creation of a
+timeline of events for a patient. The sequence of
+events captures an exhaustive list of relevant
+occurrences. Our efforts are heavily inclined
+towards creating a single source dataset that
+captures entire information of a patient which
+advertently makes training an ML model. Based
+on our study of related previous work<sup>2</sup>, an
+important first step to achieve the desired
+timeline representation is to convert our MIMICIII into a standard format - Fast Healthcare
+Interoperability (FHIR)<sup>3</sup>.
+
+This converted dataset
+in FHIR format would then be transformed into a
+sequence of events to represent the patient
+timeline. This created timeline would then be
+utilized as an input to deep neural network
+models such as CNN, LSTM. The timeline
+representation would be effective to build
+supervised prediction or classification models.
+Once the data transformed into the desired
+format we intend to explore the answers for the
+following questions:
+* Predict the readmission chance of a patient.
+* Predict the length of stay of a patient at the
+hospital.
+* Predict the survival chance of a patient given
+an ailment.
 
 # Proposed plan of research
 The main task of the project is the creation of a data pipeline to represent a patient's history, after extensive research on restructuring the data, 
-we understood that the Fast Healthcare Interoperability Resources (FHIR) format is a universally accepted structure. 
- standardize the data in FHIR format, we intend to explore Google’s Protocol buffer which is Google's language-neutral, 
- platform-neutral, extensible mechanism for serializing structured data. This enables a user to decide how the data should be structured and it can be accessed using special generated source code in a variety of languages. This allows ease of use to read and write the data from a variety of data streams.
+The next phase of the project is to convert the FHIR data obtained from the previous phase to timeline representation and build models on top of it. The first part of this process would be to identify all the feature values required in the sequence. Once these features are identified, they will be extracted. Processing for both numerical values eg. medicine information, chart values, etc and encoding textual information like reports and diagnosis would be done. Using all this information sequence of visits to the hospital would be compiled together. Using this data an LSTM, RNN based model would be trained which would leverage the sequential nature of data and then make a prediction.
 
-![Figure 1: MIMIC-III critical care database](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fsdata.2016.35/MediaObjects/41597_2016_Article_BFsdata201635_Fig1_HTML.jpg?as=webp)
-<center> Figure 1: MIMIC-III critical care database </center>
 
-After the dataset is stored in FHIR format, we aim to create sequence vectors to capture the timeline of events 
-using deep neural network techniques such as Long Short Term Memory (LSTM) and Convolutional Neural Network (CNN), and 
+![Figure 1: Timeline representation for patient](Assets/timeline_representation.png)
+
+<center> Figure 1 : Proposed Timeine represenation of patients Data </center>
+
+
+![Figure 2: Patient Timeline](https://raw.githubusercontent.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/master/Assets/Patient_timeline.png)
+<center> Figure 2: Patient Timeline </center>
+
+
+We aim to create sequence vectors to capture the timeline of events using deep neural network techniques such as Long Short Term Memory (LSTM) and Convolutional Neural Network (CNN), and 
 try to answer critical questions for instance:
 * What are the chances of a patient to be readmitted? 
 * How long would a patient stay for a known ailment? 
 * Is it possible to predict the chance of survival? 
 
 ### Data description
-The dataset used is MIMIC-III<sup>1</sup> (‘Medical Information Mart for Intensive Care’) which is an openly available dataset developed by the MIT Lab for Computational Physiology. 
-MIMIC-III is a large, freely-available database comprising de-identified health-related data associated with over forty thousand patients who stayed in critical care units of the Beth Israel Deaconess Medical Center between 2001 and 2012.
-The database includes information such as demographics, vital sign measurements made at the bedside (~1 data point per hour), laboratory test results, procedures, medications, caregiver notes, imaging reports, and mortality (including post-hospital discharge).
+The reason to convert MIMIC to FHIR is that FHIR is a standard next-generation framework created by HL7. FHIR solutions are built from a set of modular components called "Resources".
+These resources can easily be assembled into working systems that solve real-world clinical and administrative problems. FHIR is suitable for use in a wide variety of contexts – mobile phone
+apps, cloud communications, EHR-based data sharing, server communication in large institutional healthcare providers, and much more. FHIR data is generally accepted as it is fast and
+easy to implement. Strong foundation in Web standards: XML, JSON, HTTP, OAuth, etc. makes it a human-readable serialization format that could be easily used by the developers. A challenge faced by healthcare standards is how to manage the diverse variability caused by healthcare processes. As time progresses, many new fields and optional features are getting added that results in additional complexity in managing the base implementation. FHIR tackles this problem by defining a simple framework for extending the existing resources and describing their use with profiles.
 
-MIMIC-III is a relational database consisting of 26 tables. Tables are linked by identifiers which usually have the suffix ‘ID’. For example, SUBJECT_ID refers to a unique patient, HADM_ID refers to a unique admission to the hospital, and ICUSTAY_ID refers to a unique admission to an intensive care unit.
-Charted events such as notes, laboratory tests, and fluid balance are stored in a series of ‘events’ tables. For example, the OUTPUTEVENTS table contains all measurements related to output for a given patient, while the LABEVENTS table contains laboratory test results for a patient.
-Tables prefixed with ‘D_’ are dictionary tables and provide definitions for identifiers. For example, every row of CHARTEVENTS is associated with a single ITEMID which represents the concept measured, but it does not contain the actual name of the measurement. By joining CHARTEVENTS and D_ITEMS on ITEMID, it is possible to identify the concept represented by a given ITEMID.
-Broadly speaking, five tables are used to define and track patient stays: ADMISSIONS; PATIENTS; ICUSTAYS; SERVICES; and TRANSFERS. Another five tables are dictionaries for cross-referencing codes against their respective definitions: D_CPT; D_ICD_DIAGNOSES; D_ICD_PROCEDURES; D_ITEMS; and D_LABITEMS. The remaining tables contain data associated with patient care, such as physiological measurements, caregiver observations, and billing information.
+Following are some resources that we selected and converted form MIMIC III dataset:
+
+* Patient resource communicates general information of the patient.
+* Encounter resource is about a person’s visit to the hospital.
+* Procedure resource has information on the procedures performed on a patient during a single visit to the hospital.
+* Report resource discusses the diagnostic reports for a particular patient. 
+* Medication Dispense resource contains data about the medications given to the patient.
+* Observation resource contains lab reports
+for a patient. 
 
 # Preliminary results
-Performed basic exploratory data analysis on the admissions table to gather the summary statistics and analyzed the duration of stay.
-<br />![Figure 2: Descriptive Statistics](https://github.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/blob/master/Assets/descriptive_statistics.png)
-<br /><center>Figure 2: Descriptive Statistics </center> <br />
-![Figure 3: Histogram](https://github.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/blob/master/Assets/histogram.png)
-<br /><center>Figure 3: Distribution of length of stay in hospitals </center><br />
-As the size of some of the tables is too big to be loaded in local machine's memory, instead of performing analysis on the entire dataset, we analyzed an individual record in all the tables. 
-To understand the structure of the data and the relationship between the tables, the journey of a particular patient was analyzed. Using this we created a timeline of the patient's visit and health status over a long period of time.
-The timeline consists of information about every admission, diagnosis, service such as ICU, transfers, and discharge of a given patient. 
-This gives us an idea of what to capture in a sequence model for building patient's visit history.
-![Figure 4: Patient Timeline](https://raw.githubusercontent.com/priyasingh16/Fully-Automated-GCP-Healthcare-API/master/Assets/Patient_timeline.png)
-<center> Figure 4: Patient Timeline </center>
+To get the patient resource in FHIR format as shown in figure 3, the Admission Table and patient table were used to fill out the
+corresponding information. Similarly, for Encounter resource as seen in figure 4 the information about the patient's visits were found in Admission table, the information about the diagnosis was found Diagnoses_icd and D_icd_diagnoses table, the information about the locations can be found in transfers table and then were compiled together to form Encounters FHIR resource. Similar processes were performed for all other resources.
+
+![Figure 3: Patient FHIR Formated Data](Assets/patient.png)
+<center> Figure 3: Patient FHIR Resource </center>
+
+
+![Figure 4: Encounter FHIR Formated Data](Assets/encounter.png)
+<center> Figure 4: Encounter FHIR Resource </center>
 
 # References
 1. Alpha.physionet.org. (2019). MIMIC-III Clinical Database v1.4. [online] Available at: https://alpha.physionet.org/content/mimiciii/1.4/ [Accessed 28 Sep. 2019].
