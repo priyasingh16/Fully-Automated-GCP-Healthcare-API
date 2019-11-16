@@ -23,7 +23,7 @@ if __name__ == "__main__":
     md = MedicationDispense()
     pr = Procedure()
 
-    all_patient = sorted(p.all_patient())
+    all_patient = sorted(p.all_patient(), reverse = True)
     for id in all_patient:
         start = time.time()
         logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(start))
