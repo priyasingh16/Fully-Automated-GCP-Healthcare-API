@@ -30,7 +30,7 @@ class Procedure:
         """
 
         query_string = """SELECT SUBJECT_ID, HADM_ID, STARTTIME, ENDTIME, ITEMID, LOCATION, STATUSDESCRIPTION,
-            ORDERCATEGORYNAME FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
+            ORDERCATEGORYNAME, ICUSTAY_ID FROM `green-gasket-256323.mimiciii_fullyautomated.PROCEDUREEVENTS_MV` 
             where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)

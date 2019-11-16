@@ -35,7 +35,6 @@ class MedicationDispense:
             where SUBJECT_ID = {};"""
 
         query_string = query_string.format(id)
-        print(query_string)
         results = self.cl.queryRecords(query_string)
 
         r = []
