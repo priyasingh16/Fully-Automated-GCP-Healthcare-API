@@ -12,21 +12,44 @@ import json
 import sys
 from multiprocessing import Pool
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='logs/app.log',level=logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
+def setup_logger(name, log_file, level=logging.INFO):
+    """Function setup as many loggers as you want"""
+
+    handler = logging.FileHandler(log_file)        
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+# first file logger
+logger = setup_logger('Info_Logger', 'logs/app.log')
+
+# error file logger
+error_logger = setup_logger('Error_Logger', 'logs/error.log')
 
 
 def getPatientRecords( d, p, e, m, o,dr,md,pr, id):
     start = time.time()
     logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(start))
-    patient_info = p.get_patient(id)
-    encounter_info = e.get_encounter(id)
-    medicine_info = m.get_medication(id)
-    observation_info = o.get_observations(id)
-    medication_info = md.get_medication_dispense(id)
-    diagnostic_info = dr.get_diagnostic_report(id)
-    procedure_info = pr.get_procedure(id)
+    try:
+        patient_info = p.get_patient(id)
+        encounter_info = e.get_encounter(id)
+        medicine_info = m.get_medication(id)
+        observation_info = o.get_observations(id)
+        medication_info = md.get_medication_dispense(id)
+        diagnostic_info = dr.get_diagnostic_report(id)
+        procedure_info = pr.get_procedure(id)
+    except Exception as e:
+        error_logger.error('Extracting Data For ' +str(id)+ ' failed !')
+        error_logger.error(str(e))
+        return 
+
+
 
     d.insertData("patient", str(id), patient_info)
     d.insertData("encounter", str(id), {"data" : encounter_info})
