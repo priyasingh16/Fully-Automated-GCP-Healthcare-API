@@ -33,7 +33,7 @@ logger = setup_logger('Info_Logger', 'logs/app.log')
 error_logger = setup_logger('Error_Logger', 'logs/error.log')
 
 
-def getPatientRecords( d, p, e, m, o,dr,md,pr, id):
+def getPatientRecords( d, p, e, m, o, dr, md, pr, id):
     start = time.time()
     logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(start))
     try:
@@ -44,23 +44,22 @@ def getPatientRecords( d, p, e, m, o,dr,md,pr, id):
         medication_info = md.get_medication_dispense(id)
         diagnostic_info = dr.get_diagnostic_report(id)
         procedure_info = pr.get_procedure(id)
+
+        d.insertData("patient", str(id), patient_info)
+        d.insertData("encounter", str(id), {"data" : encounter_info})
+        d.insertData("medicine", str(id), {"data" : medicine_info})
+        d.insertData("obsevation", str(id), {"data" : observation_info})
+        d.insertData("medication", str(id), {"data" : medication_info})
+        d.insertData("diagnostics", str(id), {"data" : diagnostic_info})
+        d.insertData("procedure", str(id), {"data" : procedure_info})
+        end = time.time()
+        logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(end))
+        logger.info('Time taken for Id: ' + str(id) + ', time : ' + str(end-start))
+
     except Exception as e:
         error_logger.error('Extracting Data For ' +str(id)+ ' failed !')
         error_logger.error(str(e))
-        return 
 
-
-
-    d.insertData("patient", str(id), patient_info)
-    d.insertData("encounter", str(id), {"data" : encounter_info})
-    d.insertData("medicine", str(id), {"data" : medicine_info})
-    d.insertData("obsevation", str(id), {"data" : observation_info})
-    d.insertData("medication", str(id), {"data" : medication_info})
-    d.insertData("diagnostics", str(id), {"data" : diagnostic_info})
-    d.insertData("procedure", str(id), {"data" : procedure_info})
-    end = time.time()
-    logger.info('Extracting Data For Id: ' + str(id) + ', time : ' + str(end))
-    logger.info('Rime taken for Id: ' + str(id) + ', time : ' + str(end-start))
 
 def processBatch(a_b):
     a,b = a_b
