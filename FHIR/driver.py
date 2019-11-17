@@ -9,6 +9,7 @@ from report import DiagnosticReport
 from procedure import Procedure
 from observations import Observations
 import json
+import sys
 from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
@@ -53,8 +54,10 @@ def processBatch(a_b):
     all_patient = sorted(p.all_patient())
 
     for i in range(a,b):
+        if i >= len(all_patient):
+            break
         id = all_patient[i]
-        getPatientRecords( d, p, e, m, o,dr,md,pr, id)
+        getPatientRecords( d, p, e, m, o, dr, md, pr, id)
     
     return True
 
@@ -64,9 +67,26 @@ def processBatch(a_b):
 
 if __name__ == "__main__":
 
+    if len(sys.argv) != 2:
+        sys.stderr.write("Invalid Argument required offset")
+        exit(-1)
+
+    offset = int(sys.argv[1])
+
+
+    if (offset == 0 or offset == 10 or offset == 20) == False:
+        sys.stderr.write("Invalid argument offset can be 0, 10 or 20 only, for 0-20000, 20000-40000, 40000- respectively")
+        exit(-1)
+
+
     start = time.time()
+    indexes = []
+    r = 2000
+    for i in range(10):
+        indexes.append(((offset + i) * r, (offset + i + 1) *r))
+
     with Pool(10) as p:
-        print(p.map(processBatch, [(0,5), (5,10), (10,15), (15,20), (20,25), (25,30), (30,35), (35,40), (40,45), (45,50)]))
+        print(p.map(processBatch, indexes))
     print("Done")
     end = time.time()
     print(end-start)
