@@ -49,8 +49,26 @@ class FHIRprocessor:
                     medication_info[subject_id][hospital_id][feature_name] += quantity
         return medication_info
 
-    # @staticmethod
-    # def diagnostics_processor(paths):
+    @staticmethod
+    def diagnostics_processor(paths):
+        diagnostics_info = {}
+        for path in paths:        
+            with open(path, 'r') as fl:
+                js_data = json.load(fl)
+                js_data = js_data["data"]
+                
+                for data in js_data:
+                    subject_id = data["subject"]
+                    hospital_id = data["encounter"]
+                    if hospital_id == 'None':
+                        continue
+                    if subject_id not in diagnostics_info:
+                        diagnostics_info[subject_id] = {}
+                    if hospital_id not in diagnostics_info[subject_id]:
+                        diagnostics_info[subject_id][hospital_id] = ""
+                    feature_name = data["category"].lower()
+                    diagnostics_info[subject_id][hospital_id] += (feature_name + " " + data["presentedForm"].lower())
+        return diagnostics_info
         
 
 
