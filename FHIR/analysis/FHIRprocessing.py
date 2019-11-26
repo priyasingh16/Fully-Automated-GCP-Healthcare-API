@@ -6,7 +6,6 @@ import ast
 from utils import getvalue
 
 class FHIRprocessor:
-
     @staticmethod
     def medication_processor(paths):
         medication_info = {}
@@ -48,6 +47,27 @@ class FHIRprocessor:
                         medication_info[subject_id][hospital_id][feature_name] = 0
                     medication_info[subject_id][hospital_id][feature_name] += quantity
         return medication_info
+
+    @staticmethod
+    def observation_processor(paths):
+        observation_info = {}
+
+        for path in paths:
+            with open(path, 'r') as fl:
+                js_data = ast.literal_eval(fl.read())
+                js_data = ast.literal_eval(js_data['data'].replace("'" , "\""))
+                for data in js_data:
+                    subject_id = data["subject"]
+                    hospital_id = data["encounter"]
+                    if subject_id not in observation_info:
+                        observation_info[subject_id] = {}
+                    if hospital_id not in observation_info[subject_id]:
+                        observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
+                    else:
+                        observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
+                        observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
+
+        return observation_info
 
     # @staticmethod
     # def diagnostics_processor(paths):
