@@ -63,9 +63,9 @@ class FHIRprocessor:
                         observation_info[subject_id] = {}
                     if hospital_id not in observation_info[subject_id]:
                         observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
-                    else:
-                        observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
-                        observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
+                    
+                    observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
+                    observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
 
         return observation_info
 
