@@ -3,7 +3,7 @@ import glob
 import json
 import re
 import ast
-from utils import getvalue
+from utils import getvalue, periodToHours
 from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -203,7 +203,7 @@ class FHIRprocessor:
                     if hospital_id not in procedure_info[subject_id]:
                         procedure_info[subject_id][hospital_id] = {}
                     feature_name = data["performedString"].lower()
-                    quantity = data["performedPeriod"]
+                    quantity = periodToHours(data["performedRange"])
 
                     if feature_name not in procedure_info[subject_id][hospital_id]:
                         procedure_info[subject_id][hospital_id][feature_name] = 0
@@ -252,10 +252,7 @@ class FHIRprocessor:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
                 for data in js_data["data"]:
-                    date1 = datetime.datetime.strptime(data["period"].split(" - ")[0], "%Y-%m-%d %H:%M:%S") 
-                    date2 = datetime.datetime.strptime(data["period"].split(" - ")[1], "%Y-%m-%d %H:%M:%S") 
-                    length = (date2 - date1)
-                    length = length.days*24 + length.seconds/3600
+                    length = periodToHours(data["period"])
                     subject_id = data["subject"]
                     hospital_id = data["identifier"]
                     if subject_id not in encounter_info:
