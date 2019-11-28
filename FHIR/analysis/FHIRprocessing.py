@@ -290,3 +290,17 @@ class FHIRprocessor:
         
         return encounter_info
 
+    def patient_processor(paths):
+        patient_info = {}
+
+        for path in paths:
+            with open(path, 'r') as fl:
+                js_data = ast.literal_eval(fl.read())
+                for data in js_data["data"]:
+                    subject_id = data["identifier"]
+                    if subject_id not in patient_info:
+                        patient_info[subject_id] = {}
+                    patient_info['gender'] = data["gender"]
+                    patient_info['survived'] = data["deceasedBoolean"]
+                    
+        return patient_info
