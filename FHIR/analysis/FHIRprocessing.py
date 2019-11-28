@@ -4,26 +4,21 @@ import json
 import re
 import ast
 from utils import getvalue
-import nltk
 from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from AutoEncoder import Autoencoder
+from scipy.sparse import csr_matrix
 
 class FHIRprocessor:
     @staticmethod
-    def medication_processor(paths):
+    def medication_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         medication_info = {}
-        # count = 0
         for path in paths:
-            # count = count + 1
-            # if count % 10 == 0:
-            #     print(count)
-                
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
                 js_data = ast.literal_eval(js_data['data'].replace("'" , "\""))
-                
+
                 for data in js_data:
                     subject_id = data["subject"]
                     hospital_id = data["context"]
@@ -51,7 +46,56 @@ class FHIRprocessor:
                     if feature_name not in medication_info[subject_id][hospital_id]:
                         medication_info[subject_id][hospital_id][feature_name] = 0
                     medication_info[subject_id][hospital_id][feature_name] += quantity
-        return medication_info
+
+        feature_dict = {}
+        row = []
+        columns = []
+        data = []
+        feature_index = 0
+        row_index = 0
+        medication_info_row_mapping = {}
+
+        for subject_id in medication_info:
+            medication_info_row_mapping[subject_id] = {}
+            for hospital_id in medication_info[subject_id]:
+                for feature in medication_info[subject_id][hospital_id]:
+
+                    if feature not in feature_dict:
+                        feature_dict[feature] = feature_index
+                        feature_index = feature_index + 1
+                        
+                    row.append(row_index)
+                    columns.append(feature_dict[feature])
+                    data.append(medication_info[subject_id][hospital_id][feature])
+
+                medication_info_row_mapping[subject_id][hospital_id] = row_index
+                row_index += 1
+
+        sparse_matrix = csr_matrix((data, (row, columns)), shape=(row_index, feature_index))
+
+
+        inp_shape = sparse_matrix.shape[1]
+        textAutoEncoder = Autoencoder(inputshape = inp_shape, encoding_dim = num_embedding)
+        autoencoder, encoder, decoder = textAutoEncoder.Model()
+
+
+        print("training model")
+        X_train, X_test = train_test_split( sparse_matrix , test_size=0.33, random_state=42)
+        autoencoder.fit(X_train, X_train,
+                        epochs=num_epochs,
+                        batch_size=batch_size,
+                        shuffle=True,
+                        validation_data=(X_test, X_test),
+                        verbose = False)
+
+        medication_auto_encoder_data = {}
+        for subject_id in medication_info_row_mapping:
+            medication_auto_encoder_data[subject_id] = {}
+            for hospital_id in medication_info_row_mapping[subject_id]:
+                index = medication_info_row_mapping[subject_id][hospital_id]
+                medication_auto_encoder_data[subject_id][hospital_id] = encoder.predict(sparse_matrix[index])
+
+        return medication_auto_encoder_data
 
     @staticmethod
     def diagnostics_processor(paths, num_epochs, num_embedding=500, batch_size=256):
