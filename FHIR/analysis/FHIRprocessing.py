@@ -164,55 +164,28 @@ class FHIRprocessor:
 
     @staticmethod
     def observation_processor(paths):
-        observation_info = {}
-        for path in paths:
-            with open(path, 'r') as fl:
-                js_data = ast.literal_eval(fl.read())
-                js_data = ast.literal_eval(js_data['data'].replace("'" , "\""))
-                for data in js_data:
-                    subject_id = data["subject"]
-                    hospital_id = data["encounter"]
-                    if subject_id not in observation_info:
-                        observation_info[subject_id] = {}
-                    if hospital_id not in observation_info[subject_id]:
-                        observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
-                    observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
-                    observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
-                feature_dict = {}
+    observation_info_output = {}
+    for path in paths:
+        with open(path, 'r') as fl:
+            js_data = ast.literal_eval(fl.read())
+            js_data = ast.literal_eval(js_data['data'].replace("'" , "\""))
+            for data in js_data:
+                subject_id = data["subject"]
+                hospital_id = data["encounter"]
+                if subject_id not in observation_info:
+                    observation_info[subject_id] = {}
+                    observation_info_output[subject_id] = {}
+                if hospital_id not in observation_info[subject_id]:
+                    observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
+                observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
+                observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
+            
+            abnormal_tc = observation_info[subject_id][hospital_id]["abnormal_test_count"] 
+            total_tc = observation_info[subject_id][hospital_id]["all_test_count"] 
 
-        row = []
-        columns = []
-        data = []
-        feature_index = 0
-        row_index = 0
-        observation_info_row_mapping = {}
-
-        for subject_id in observation_info:
-            observation_info_row_mapping[subject_id] = {}
-            for hospital_id in observation_info[subject_id]:
-                for feature in observation_info[subject_id][hospital_id]:
-
-                    if feature not in feature_dict:
-                        feature_dict[feature] = feature_index
-                        feature_index = feature_index + 1
-
-                    row.append(row_index)
-                    columns.append(feature_dict[feature])
-                    data.append(observation_info[subject_id][hospital_id][feature])
-
-                observation_info_row_mapping[subject_id][hospital_id] = row_index
-                row_index += 1
-
-        sparse_matrix = csr_matrix((data, (row, columns)), shape=(row_index, feature_index))
-
-        observation_auto_encoder_data = {}
-        for subject_id in observation_auto_encoder_data:
-            observation_auto_encoder_data[subject_id] = {}
-            for hospital_id in observation_auto_encoder_data[subject_id]:
-                index = observation_auto_encoder_data[subject_id][hospital_id]
-                observation_auto_encoder_data[subject_id][hospital_id] = sparse_matrix[index].toarray()
-
-        return observation_auto_encoder_data
+            if hospital_id not in observation_info_output:
+                observation_info_output[subject_id][hospital_id] = np.array([abnormal_tc, total_tc])
+    return observation_info_output
 
     @staticmethod
     def procedure_processor(paths):
