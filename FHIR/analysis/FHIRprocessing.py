@@ -1,4 +1,4 @@
-
+import datetime
 import glob
 import json
 import re
@@ -245,8 +245,8 @@ class FHIRprocessor:
         return procedure_auto_encoder_data
 
     def encounter_processor(paths, num_epochs, num_embedding=500, batch_size=256):
+        stop_words = set(stopwords.words('english'))
         encounter_info = {}
-        
         text = []
         for path in paths:
             with open(path, 'r') as fl:
