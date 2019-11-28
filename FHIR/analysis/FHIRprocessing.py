@@ -184,4 +184,64 @@ class FHIRprocessor:
 
         return observation_info
 
+    @staticmethod
+    def procedure_processor(paths):
+        procedure_info = {}
+
+        for path in paths:
+            with open(path, 'r') as fl:
+                js_data = ast.literal_eval(fl.read())
+                js_data = ast.literal_eval(js_data['data'].replace("'", "\""))
+
+                if len(js_data) == 0:
+                    continue
+
+                for data in js_data:
+                    subject_id = data["subject"]
+                    hospital_id = data["encounter"]
+                    if subject_id not in procedure_info:
+                        procedure_info[subject_id] = {}
+                    if hospital_id not in procedure_info[subject_id]:
+                        procedure_info[subject_id][hospital_id] = {}
+                    feature_name = data["performedString"].lower()
+                    quantity = data["performedPeriod"]
+
+                    if feature_name not in procedure_info[subject_id][hospital_id]:
+                        procedure_info[subject_id][hospital_id][feature_name] = 0
+                    procedure_info[subject_id][hospital_id][feature_name] += quantity
+
+        feature_dict = {}
+        row = []
+        columns = []
+        data = []
+        feature_index = 0
+        row_index = 0
+        procedure_info_row_mapping = {}
+
+        for subject_id in procedure_info:
+            procedure_info_row_mapping[subject_id] = {}
+            for hospital_id in procedure_info[subject_id]:
+                for feature in procedure_info[subject_id][hospital_id]:
+
+                    if feature not in feature_dict:
+                        feature_dict[feature] = feature_index
+                        feature_index = feature_index + 1
+
+                    row.append(row_index)
+                    columns.append(feature_dict[feature])
+                    data.append(procedure_info[subject_id][hospital_id][feature])
+
+                procedure_info_row_mapping[subject_id][hospital_id] = row_index
+                row_index += 1
+
+        sparse_matrix = csr_matrix((data, (row, columns)), shape=(row_index, feature_index))
+
+        procedure_auto_encoder_data = {}
+        for subject_id in procedure_info_row_mapping:
+            procedure_auto_encoder_data[subject_id] = {}
+            for hospital_id in procedure_info_row_mapping[subject_id]:
+                index = procedure_info_row_mapping[subject_id][hospital_id]
+                procedure_auto_encoder_data[subject_id][hospital_id] = sparse_matrix[index].toarray()
+
+        return procedure_auto_encoder_data
 
