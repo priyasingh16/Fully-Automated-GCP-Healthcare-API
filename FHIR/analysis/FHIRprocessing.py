@@ -186,11 +186,11 @@ class FHIRprocessor:
     @staticmethod
     def encounter_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         encounter_info = {}
-        js_data = ast.literal_eval(fl.read())
         
         text = []
         for path in paths:
             with open(path, 'r') as fl:
+                js_data = ast.literal_eval(fl.read())
                 for data in js_data["data"]:
                     date1 = datetime.datetime.strptime(data["period"].split(" - ")[0], "%Y-%m-%d %H:%M:%S") 
                     date2 = datetime.datetime.strptime(data["period"].split(" - ")[1], "%Y-%m-%d %H:%M:%S") 
