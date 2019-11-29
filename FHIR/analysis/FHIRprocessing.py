@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from AutoEncoder import Autoencoder
 from scipy.sparse import csr_matrix
+from sklearn.preprocessing import OneHotEncoder
 
 class FHIRprocessor:
     @staticmethod
@@ -252,28 +253,35 @@ class FHIRprocessor:
         stop_words = set(stopwords.words('english'))
         encounter_info = {}
         text = []
+        code_list = []
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
+                if len(js_data) == 0:
+                    continue
                 for data in js_data["data"]:
                     length = periodToHours(data["period"])
-                    subject_id = data["subject"]
-                    hospital_id = data["identifier"]
+                    subject_id = int(data["subject"])
+                    hospital_id = int(data["identifier"])
                     if subject_id not in encounter_info:
                         encounter_info[subject_id] = {}
                     if hospital_id not in encounter_info[subject_id]:
                         encounter_info[subject_id][hospital_id] = {}
                     encounter_info[subject_id][hospital_id]["length"] = length
                     encounter_info[subject_id][hospital_id]["reason_code"] = data["reasonCode"]
+                    code_list.append([data["reasonCode"]])
                     diag = " ".join([i["condition"] for i in ast.literal_eval(data["diagnosis"]) if i["condition"] != None]).lower()
                     encounter_info[subject_id][hospital_id]["encounter_diagnosis"] = diag
                     words = [w for w in diag.split() if not w in stop_words]
                     text.append(" ".join(words))
             
+        enc = OneHotEncoder(handle_unknown='ignore')
+        categorical_diagnosis = enc.fit_transform(code_list)
+
         vectorizer = TfidfVectorizer(max_df=0.95, min_df=0.05)
         vector = vectorizer.fit_transform(text)
-
         inp_shape = vector.shape[1]
+
         textAutoEncoder = Autoencoder(inputshape = inp_shape, encoding_dim = num_embedding)
         autoencoder, encoder, decoder = textAutoEncoder.Model()
 
@@ -284,48 +292,24 @@ class FHIRprocessor:
                         shuffle=True,
                         validation_data=(X_test, X_test))
 
+        ind = 0
+        encounter_auto_encoded = {}
         for subject_id in encounter_info:
             for hospital_id in encounter_info[subject_id]:
                 words = encounter_info[subject_id][hospital_id]["encounter_diagnosis"].lower()
                 words = [w for w in words.split() if not w in stop_words]
                 model_inp = vectorizer.transform([" ".join(words)])
                 encoded_output = encoder.predict(model_inp)
-                encounter_info[subject_id][hospital_id]["autoencoded_diagnosis"] = list(encoded_output)
+                one_observation = [encounter_info[subject_id][hospital_id]["length"]]
+                one_observation.extend(categorical_diagnosis[ind].A[0])
+                one_observation.extend(encoded_output[0])
+                ind += 1
+                if subject_id not in encounter_auto_encoded:
+                    encounter_auto_encoded[subject_id] = {}
+                encounter_auto_encoded[subject_id][hospital_id] = one_observation
 
-        feature_dict = {}
-        row = []
-        columns = []
-        data = []
-        feature_index = 0
-        row_index = 0
-        encounter_info_row_mapping = {}
+        return encounter_auto_encoded
 
-        for subject_id in encounter_info:
-            encounter_info_row_mapping[subject_id] = {}
-            for hospital_id in encounter_info[subject_id]:
-                for feature in encounter_info[subject_id][hospital_id]:
-
-                    if feature not in feature_dict:
-                        feature_dict[feature] = feature_index
-                        feature_index = feature_index + 1
-
-                    row.append(row_index)
-                    columns.append(feature_dict[feature])
-                    data.append(encounter_info[subject_id][hospital_id][feature])
-
-                encounter_info_row_mapping[subject_id][hospital_id] = row_index
-                row_index += 1
-
-        sparse_matrix = csr_matrix((data, (row, columns)), shape=(row_index, feature_index))
-
-        encounter_auto_encoder_data = {}
-        for subject_id in encounter_auto_encoder_data:
-            encounter_auto_encoder_data[subject_id] = {}
-            for hospital_id in encounter_auto_encoder_data[subject_id]:
-                index = encounter_auto_encoder_data[subject_id][hospital_id]
-                encounter_auto_encoder_data[subject_id][hospital_id] = sparse_matrix[index].toarray()
-        
-        return encounter_auto_encoder_data
 
     def patient_processor(paths):
         patient_info = {}
