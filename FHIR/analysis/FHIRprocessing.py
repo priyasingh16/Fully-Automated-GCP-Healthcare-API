@@ -326,12 +326,12 @@ class FHIRprocessor:
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
-                for data in js_data["data"]:
-                    subject_id = data["identifier"]
-                    if subject_id not in patient_info:
-                        patient_info[subject_id] = {}
-                    patient_info['gender'] = data["gender"]
-                    patient_info['survived'] = data["deceasedBoolean"]
-                    
+                subject_id = js_data["identifier"]
+                if subject_id not in patient_info:
+                    patient_info[subject_id] = {}
+                patient_info[subject_id]['gender'] = js_data["gender"]
+                if js_data["deceasedBoolean"] == '1':
+                    patient_info[subject_id]['survived'] = False
+                else:
+                    patient_info[subject_id]['survived'] = True
         return patient_info
-
