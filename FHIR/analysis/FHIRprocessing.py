@@ -173,6 +173,7 @@ class FHIRprocessor:
     @staticmethod
     def observation_processor(paths):
         observation_info_output = {}
+        observation_info = {}
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
@@ -187,12 +188,12 @@ class FHIRprocessor:
                         observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
                     observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
                     observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
-                
+
+        for subject_id in observation_info:
+            for hospital_id in observation_info[subject_id]:
                 abnormal_tc = observation_info[subject_id][hospital_id]["abnormal_test_count"] 
                 total_tc = observation_info[subject_id][hospital_id]["all_test_count"] 
-
-                if hospital_id not in observation_info_output:
-                    observation_info_output[subject_id][hospital_id] = np.array([abnormal_tc, total_tc])
+                observation_info_output[subject_id][hospital_id] = [abnormal_tc, total_tc]
         return observation_info_output
 
     @staticmethod
