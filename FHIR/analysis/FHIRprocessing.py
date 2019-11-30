@@ -339,7 +339,7 @@ class FHIRprocessor:
         return patient_info
 
     @staticmethod
-    def get_data(subject_id, hospital_id, procedure_output, medication_output, diagnostics_output, observation_output, encounter_output):
+    def get_data(subject_id, hospital_id, procedure_output, medication_output, diagnostics_output, observation_output, encounter_output, lengthOfStay):
         default_medication_len = 100
         default_procedure_len = 11
         default_diagnostics_len = 500
@@ -369,13 +369,16 @@ class FHIRprocessor:
 
         encounter_data = [0] * default_encounter_len
         if subject_id in encounter_output and hospital_id in encounter_output[subject_id]:
-            encounter_data = encounter_output[subject_id][hospital_id]
+            if lengthOfStay == True:
+                encounter_data = encounter_output[subject_id][hospital_id]
+            else:
+                encounter_data = encounter_output[subject_id][hospital_id][1:]
         output = output + encounter_data
 
         return output
 
     @staticmethod
-    def process_sequence():
+    def process_sequence(lengthOfStay=False):
 
         with open("data/procedure_output.json") as fp:
             procedure_output = json.load(fp)
@@ -423,8 +426,12 @@ class FHIRprocessor:
             final_merge[subject_id] = {}
             for hospital_id in encounter_output[subject_id]:
                 output = FHIRprocessor.get_data(subject_id, hospital_id, procedure_output, medication_output,
-                                                diagnostics_output, observation_output, encounter_output)
+                                                diagnostics_output, observation_output, encounter_output, lengthOfStay)
                 final_merge[subject_id][hospital_id] = output
 
-        with open("data/final_merge.json", "w+") as fp:
-            json.dump(final_merge, fp)
+        if lengthOfStay == False:
+            with open("data/final_merge.json", "w+") as fp:
+                json.dump(final_merge, fp)
+        else:
+            with open("data/final_merge_with_len.json", "w+") as fp:
+                json.dump(final_merge, fp)
