@@ -335,3 +335,39 @@ class FHIRprocessor:
                 else:
                     patient_info[subject_id]['survived'] = True
         return patient_info
+
+    @staticmethod
+    def get_data(subject_id, hospital_id, procedure_output, medication_output, diagnostics_output, observation_output, encounter_output):
+        default_medication_len = 100
+        default_procedure_len = 11
+        default_diagnostics_len = 500
+        default_observation_len = 2
+        default_encounter_len = 201
+
+        output = []
+        medication_data = [0] * default_medication_len
+        if subject_id in medication_output and hospital_id in medication_output[subject_id]:
+            medication_data = medication_output[subject_id][hospital_id]
+        output = output + medication_data
+
+        procedure_data = [0] * default_procedure_len
+        if subject_id in procedure_output and hospital_id in procedure_output[subject_id]:
+            procedure_data = procedure_output[subject_id][hospital_id]
+        output = output + procedure_data
+
+        diagnostics_data = [0] * default_diagnostics_len
+        if subject_id in diagnostics_output and hospital_id in diagnostics_output[subject_id]:
+            diagnostics_data = diagnostics_output[subject_id][hospital_id]
+        output = output + diagnostics_data
+
+        observation_data = [0] * default_observation_len
+        if subject_id in observation_output and hospital_id in observation_output[subject_id]:
+            observation_data = observation_output[subject_id][hospital_id]
+        output = output + observation_data
+
+        encounter_data = [0] * default_encounter_len
+        if subject_id in encounter_output and hospital_id in encounter_output[subject_id]:
+            encounter_data = encounter_output[subject_id][hospital_id]
+        output = output + encounter_data
+
+        return output
