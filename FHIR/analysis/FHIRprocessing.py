@@ -11,7 +11,9 @@ from AutoEncoder import Autoencoder
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import OneHotEncoder
 
-class FHIRprocessor:  
+
+class FHIRprocessor:
+
     @staticmethod
     def medication_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         medication_info = {}
@@ -371,3 +373,58 @@ class FHIRprocessor:
         output = output + encounter_data
 
         return output
+
+    @staticmethod
+    def process_sequence():
+
+        with open("data/procedure_output.json") as fp:
+            procedure_output = json.load(fp)
+
+        with open("data/medication_output.json") as fp:
+            medication_output = json.load(fp)
+
+        with open("data/diagnostics_output.json") as fp:
+            diagnostics_output = json.load(fp)
+
+        with open("data/observation_output.json") as fp:
+            observation_output = json.load(fp)
+
+        with open("data/encounter_output.json") as fp:
+            encounter_output = json.load(fp)
+
+        with open("data/patient_output.json") as fp:
+            patient_output = json.load(fp)
+
+        final_merge = {}
+        union_subject_ids = []
+
+        union_subject_ids = union_subject_ids + list(procedure_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(medication_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(diagnostics_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(observation_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(encounter_output.keys())
+        union_subject_ids = set(union_subject_ids)
+
+        for subject_id in patient_output:
+            if subject_id not in union_subject_ids:
+                continue
+
+            if subject_id not in encounter_output:
+                continue
+
+            final_merge[subject_id] = {}
+            for hospital_id in encounter_output[subject_id]:
+                output = FHIRprocessor.get_data(subject_id, hospital_id, procedure_output, medication_output,
+                                                diagnostics_output, observation_output, encounter_output)
+                final_merge[subject_id][hospital_id] = output
+
+        with open("data/final_merge.json", "w+") as fp:
+            json.dump(final_merge, fp)
