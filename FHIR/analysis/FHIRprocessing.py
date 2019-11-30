@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from AutoEncoder import Autoencoder
 from scipy.sparse import csr_matrix
+from sklearn.preprocessing import OneHotEncoder
 
 class FHIRprocessor:  
     @staticmethod
@@ -165,15 +166,13 @@ class FHIRprocessor:
                 encoded_ouput = encoder.predict(model_inp)[0]
                 encoded_ouput = [float(a) for a in encoded_ouput]
                 diagnostics_transformed_info[subject_id][hadm_id] = encoded_ouput
-
                 
         return diagnostics_transformed_info
 
 
     @staticmethod
     def observation_processor(paths):
-        observation_info = {}
-
+        observation_info_output = {}
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
@@ -183,12 +182,18 @@ class FHIRprocessor:
                     hospital_id = data["encounter"]
                     if subject_id not in observation_info:
                         observation_info[subject_id] = {}
+                        observation_info_output[subject_id] = {}
                     if hospital_id not in observation_info[subject_id]:
                         observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
                     observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
                     observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
+                
+                abnormal_tc = observation_info[subject_id][hospital_id]["abnormal_test_count"] 
+                total_tc = observation_info[subject_id][hospital_id]["all_test_count"] 
 
-        return observation_info
+                if hospital_id not in observation_info_output:
+                    observation_info_output[subject_id][hospital_id] = np.array([abnormal_tc, total_tc])
+        return observation_info_output
 
     @staticmethod
     def procedure_processor(paths):
@@ -255,28 +260,35 @@ class FHIRprocessor:
         stop_words = set(stopwords.words('english'))
         encounter_info = {}
         text = []
+        code_list = []
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
+                if len(js_data) == 0:
+                    continue
                 for data in js_data["data"]:
                     length = periodToHours(data["period"])
-                    subject_id = data["subject"]
-                    hospital_id = data["identifier"]
+                    subject_id = int(data["subject"])
+                    hospital_id = int(data["identifier"])
                     if subject_id not in encounter_info:
                         encounter_info[subject_id] = {}
                     if hospital_id not in encounter_info[subject_id]:
                         encounter_info[subject_id][hospital_id] = {}
                     encounter_info[subject_id][hospital_id]["length"] = length
                     encounter_info[subject_id][hospital_id]["reason_code"] = data["reasonCode"]
+                    code_list.append([data["reasonCode"]])
                     diag = " ".join([i["condition"] for i in ast.literal_eval(data["diagnosis"]) if i["condition"] != None]).lower()
                     encounter_info[subject_id][hospital_id]["encounter_diagnosis"] = diag
                     words = [w for w in diag.split() if not w in stop_words]
                     text.append(" ".join(words))
             
+        enc = OneHotEncoder(handle_unknown='ignore')
+        categorical_diagnosis = enc.fit_transform(code_list)
+
         vectorizer = TfidfVectorizer(max_df=0.95, min_df=0.05)
         vector = vectorizer.fit_transform(text)
-
         inp_shape = vector.shape[1]
+
         textAutoEncoder = Autoencoder(inputshape = inp_shape, encoding_dim = num_embedding)
         autoencoder, encoder, decoder = textAutoEncoder.Model()
 
@@ -287,13 +299,36 @@ class FHIRprocessor:
                         shuffle=True,
                         validation_data=(X_test, X_test))
 
+        ind = 0
+        encounter_auto_encoded = {}
         for subject_id in encounter_info:
             for hospital_id in encounter_info[subject_id]:
                 words = encounter_info[subject_id][hospital_id]["encounter_diagnosis"].lower()
                 words = [w for w in words.split() if not w in stop_words]
                 model_inp = vectorizer.transform([" ".join(words)])
                 encoded_output = encoder.predict(model_inp)
-                encounter_info[subject_id][hospital_id]["autoencoded_diagnosis"] = list(encoded_output)
-        
-        return encounter_info
+                one_observation = [encounter_info[subject_id][hospital_id]["length"]]
+                one_observation.extend(categorical_diagnosis[ind].A[0])
+                one_observation.extend(encoded_output[0])
+                ind += 1
+                if subject_id not in encounter_auto_encoded:
+                    encounter_auto_encoded[subject_id] = {}
+                encounter_auto_encoded[subject_id][hospital_id] = one_observation
 
+        return encounter_auto_encoded
+
+
+    def patient_processor(paths):
+        patient_info = {}
+
+        for path in paths:
+            with open(path, 'r') as fl:
+                js_data = ast.literal_eval(fl.read())
+                for data in js_data["data"]:
+                    subject_id = data["identifier"]
+                    if subject_id not in patient_info:
+                        patient_info[subject_id] = {}
+                    patient_info['gender'] = data["gender"]
+                    patient_info['survived'] = data["deceasedBoolean"]
+                    
+        return patient_info
