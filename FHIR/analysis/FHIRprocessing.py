@@ -11,7 +11,7 @@ from AutoEncoder import Autoencoder
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import OneHotEncoder
 
-class FHIRprocessor:
+class FHIRprocessor:  
     @staticmethod
     def medication_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         medication_info = {}
@@ -34,7 +34,8 @@ class FHIRprocessor:
                     # equating to string false because 0 is a valid value but is considered false
                     if quantity_value != "false": 
                         quantity = quantity_value
-                    elif re.findall("\d*\.?\d*-\d*\.?\d*", quantity):
+                    elif len(re.findall("\d*\.?\d*-\d*\.?\d*", quantity)) > 0:
+                        quantity = re.findall("\d*\.?\d*-\d*\.?\d*", quantity)[0]
                         quantity = quantity.split("-")
                         quantity = list(map(getvalue, quantity))
                         quantity = sum(quantity) / len(quantity)
@@ -89,12 +90,17 @@ class FHIRprocessor:
                         validation_data=(X_test, X_test),
                         verbose = False)
 
+        print("model fit finished")
+
         medication_auto_encoder_data = {}
         for subject_id in medication_info_row_mapping:
             medication_auto_encoder_data[subject_id] = {}
             for hospital_id in medication_info_row_mapping[subject_id]:
                 index = medication_info_row_mapping[subject_id][hospital_id]
-                medication_auto_encoder_data[subject_id][hospital_id] = encoder.predict(sparse_matrix[index])
+                encoded_ouput = encoder.predict(sparse_matrix[index])[0]
+                encoded_ouput = [float(a) for a in encoded_ouput]
+                medication_auto_encoder_data[subject_id][hospital_id] = encoded_ouput
+        print("saving model data")
 
         return medication_auto_encoder_data
 
@@ -157,8 +163,9 @@ class FHIRprocessor:
                 words = diagnostics_info[subject_id][hadm_id].lower()
                 words = [w for w in words.split() if not w in stop_words]
                 model_inp = vectorizer.transform([" ".join(words)])
-                encoded_ouput = encoder.predict(model_inp)
-                diagnostics_transformed_info[subject_id][hadm_id] = list(encoded_ouput)
+                encoded_ouput = encoder.predict(model_inp)[0]
+                encoded_ouput = [float(a) for a in encoded_ouput]
+                diagnostics_transformed_info[subject_id][hadm_id] = encoded_ouput
                 
         return diagnostics_transformed_info
 
@@ -166,7 +173,7 @@ class FHIRprocessor:
     @staticmethod
     def observation_processor(paths):
         observation_info_output = {}
-        observation_info = {}        
+        observation_info = {}
         for path in paths:
             with open(path, 'r') as fl:
                 js_data = ast.literal_eval(fl.read())
@@ -181,12 +188,12 @@ class FHIRprocessor:
                         observation_info[subject_id][hospital_id] = {"abnormal_test_count" : 0, "all_test_count":0}
                     observation_info[subject_id][hospital_id]["abnormal_test_count"] += data["valueInteger"]
                     observation_info[subject_id][hospital_id]["all_test_count"] += data["valueQuantity"]
-                
+
+        for subject_id in observation_info:
+            for hospital_id in observation_info[subject_id]:
                 abnormal_tc = observation_info[subject_id][hospital_id]["abnormal_test_count"] 
                 total_tc = observation_info[subject_id][hospital_id]["all_test_count"] 
-
-                if hospital_id not in observation_info_output:
-                    observation_info_output[subject_id][hospital_id] = np.array([abnormal_tc, total_tc])
+                observation_info_output[subject_id][hospital_id] = [abnormal_tc, total_tc]
         return observation_info_output
 
     @staticmethod
@@ -246,7 +253,7 @@ class FHIRprocessor:
             procedure_auto_encoder_data[subject_id] = {}
             for hospital_id in procedure_info_row_mapping[subject_id]:
                 index = procedure_info_row_mapping[subject_id][hospital_id]
-                procedure_auto_encoder_data[subject_id][hospital_id] = sparse_matrix[index].toarray()
+                procedure_auto_encoder_data[subject_id][hospital_id] = list(sparse_matrix[index].toarray()[0])
 
         return procedure_auto_encoder_data
 
