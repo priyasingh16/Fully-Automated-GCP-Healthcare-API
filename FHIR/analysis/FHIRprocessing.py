@@ -257,6 +257,7 @@ class FHIRprocessor:
 
         return procedure_auto_encoder_data
 
+    @staticmethod
     def encounter_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         stop_words = set(stopwords.words('english'))
         encounter_info = {}
@@ -276,15 +277,15 @@ class FHIRprocessor:
                     if hospital_id not in encounter_info[subject_id]:
                         encounter_info[subject_id][hospital_id] = {}
                     encounter_info[subject_id][hospital_id]["length"] = length
-                    encounter_info[subject_id][hospital_id]["reason_code"] = data["reasonCode"]
+                    # encounter_info[subject_id][hospital_id]["reason_code"] = data["reasonCode"]
                     code_list.append([data["reasonCode"]])
                     diag = " ".join([i["condition"] for i in ast.literal_eval(data["diagnosis"]) if i["condition"] != None]).lower()
                     encounter_info[subject_id][hospital_id]["encounter_diagnosis"] = diag
                     words = [w for w in diag.split() if not w in stop_words]
                     text.append(" ".join(words))
             
-        enc = OneHotEncoder(handle_unknown='ignore')
-        categorical_diagnosis = enc.fit_transform(code_list)
+        # enc = OneHotEncoder(handle_unknown='ignore')
+        # categorical_diagnosis = enc.fit_transform(code_list)
 
         vectorizer = TfidfVectorizer(max_df=0.95, min_df=0.05)
         vector = vectorizer.fit_transform(text)
@@ -298,7 +299,8 @@ class FHIRprocessor:
                         epochs=num_epochs,
                         batch_size=batch_size,
                         shuffle=True,
-                        validation_data=(X_test, X_test))
+                        validation_data=(X_test, X_test),
+                        verbose=True)
 
         ind = 0
         encounter_auto_encoded = {}
@@ -308,17 +310,16 @@ class FHIRprocessor:
                 words = [w for w in words.split() if not w in stop_words]
                 model_inp = vectorizer.transform([" ".join(words)])
                 encoded_output = encoder.predict(model_inp)
-                one_observation = [encounter_info[subject_id][hospital_id]["length"]]
-                one_observation.extend(categorical_diagnosis[ind].A[0])
-                one_observation.extend(encoded_output[0])
+                encoded_output = [float(i) for i in encoded_output[0]]
+                output = [encounter_info[subject_id][hospital_id]["length"]] + encoded_output
                 ind += 1
                 if subject_id not in encounter_auto_encoded:
                     encounter_auto_encoded[subject_id] = {}
-                encounter_auto_encoded[subject_id][hospital_id] = one_observation
+                encounter_auto_encoded[subject_id][hospital_id] = output
 
         return encounter_auto_encoded
 
-
+    @staticmethod
     def patient_processor(paths):
         patient_info = {}
 
@@ -333,3 +334,4 @@ class FHIRprocessor:
                     patient_info['survived'] = data["deceasedBoolean"]
                     
         return patient_info
+

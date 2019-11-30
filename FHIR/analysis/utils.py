@@ -13,5 +13,5 @@ def periodToHours(s):
     date2 = datetime.datetime.strptime(s.split(" - ")[1], "%Y-%m-%d %H:%M:%S") 
     length = (date2 - date1)
     length = length.days*24 + length.seconds/3600
-    return length
+    return float(length)
 
