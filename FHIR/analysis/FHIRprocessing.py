@@ -256,7 +256,8 @@ class FHIRprocessor:
                 procedure_auto_encoder_data[subject_id][hospital_id] = list(sparse_matrix[index].toarray()[0])
 
         return procedure_auto_encoder_data
-
+    
+    @staticmethod
     def encounter_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         stop_words = set(stopwords.words('english'))
         encounter_info = {}
@@ -318,7 +319,7 @@ class FHIRprocessor:
 
         return encounter_auto_encoded
 
-
+    @staticmethod
     def patient_processor(paths):
         patient_info = {}
 
