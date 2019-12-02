@@ -11,7 +11,9 @@ from AutoEncoder import Autoencoder
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import OneHotEncoder
 
-class FHIRprocessor:  
+
+class FHIRprocessor:
+
     @staticmethod
     def medication_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         medication_info = {}
@@ -256,7 +258,6 @@ class FHIRprocessor:
                 procedure_auto_encoder_data[subject_id][hospital_id] = list(sparse_matrix[index].toarray()[0])
 
         return procedure_auto_encoder_data
-    
     @staticmethod
     def encounter_processor(paths, num_epochs, num_embedding=500, batch_size=256):
         stop_words = set(stopwords.words('english'))
@@ -299,7 +300,8 @@ class FHIRprocessor:
                         epochs=num_epochs,
                         batch_size=batch_size,
                         shuffle=True,
-                        validation_data=(X_test, X_test))
+                        validation_data=(X_test, X_test),
+                        verbose=True)
 
         ind = 0
         encounter_auto_encoded = {}
@@ -309,13 +311,12 @@ class FHIRprocessor:
                 words = [w for w in words.split() if not w in stop_words]
                 model_inp = vectorizer.transform([" ".join(words)])
                 encoded_output = encoder.predict(model_inp)
-                one_observation = [encounter_info[subject_id][hospital_id]["length"]]
-                # one_observation.extend(categorical_diagnosis[ind].A[0])
-                one_observation.extend(encoded_output[0])
+                encoded_output = [float(i) for i in encoded_output[0]]
+                output = [encounter_info[subject_id][hospital_id]["length"]] + encoded_output
                 ind += 1
                 if subject_id not in encounter_auto_encoded:
                     encounter_auto_encoded[subject_id] = {}
-                encounter_auto_encoded[subject_id][hospital_id] = one_observation
+                encounter_auto_encoded[subject_id][hospital_id] = output
 
         return encounter_auto_encoded
 
@@ -335,3 +336,101 @@ class FHIRprocessor:
                 else:
                     patient_info[subject_id]['survived'] = True
         return patient_info
+
+    @staticmethod
+    def get_data(subject_id, hospital_id, procedure_output, medication_output, diagnostics_output, observation_output, encounter_output, lengthOfStay):
+        default_medication_len = 100
+        default_procedure_len = 11
+        default_diagnostics_len = 500
+        default_observation_len = 2
+        default_encounter_len = 201
+
+        output = []
+        medication_data = [0] * default_medication_len
+        if subject_id in medication_output and hospital_id in medication_output[subject_id]:
+            medication_data = medication_output[subject_id][hospital_id]
+        output = output + medication_data
+
+        procedure_data = [0] * default_procedure_len
+        if subject_id in procedure_output and hospital_id in procedure_output[subject_id]:
+            procedure_data = procedure_output[subject_id][hospital_id]
+        output = output + procedure_data
+
+        diagnostics_data = [0] * default_diagnostics_len
+        if subject_id in diagnostics_output and hospital_id in diagnostics_output[subject_id]:
+            diagnostics_data = diagnostics_output[subject_id][hospital_id]
+        output = output + diagnostics_data
+
+        observation_data = [0] * default_observation_len
+        if subject_id in observation_output and hospital_id in observation_output[subject_id]:
+            observation_data = observation_output[subject_id][hospital_id]
+        output = output + observation_data
+
+        encounter_data = [0] * default_encounter_len
+        if subject_id in encounter_output and hospital_id in encounter_output[subject_id]:
+            if lengthOfStay == True:
+                encounter_data = encounter_output[subject_id][hospital_id]
+            else:
+                encounter_data = encounter_output[subject_id][hospital_id][1:]
+        output = output + encounter_data
+
+        return output
+
+    @staticmethod
+    def process_sequence(lengthOfStay=False):
+
+        with open("data/procedure_output.json") as fp:
+            procedure_output = json.load(fp)
+
+        with open("data/medication_output.json") as fp:
+            medication_output = json.load(fp)
+
+        with open("data/diagnostics_output.json") as fp:
+            diagnostics_output = json.load(fp)
+
+        with open("data/observation_output.json") as fp:
+            observation_output = json.load(fp)
+
+        with open("data/encounter_output.json") as fp:
+            encounter_output = json.load(fp)
+
+        with open("data/patient_output.json") as fp:
+            patient_output = json.load(fp)
+
+        final_merge = {}
+        union_subject_ids = []
+
+        union_subject_ids = union_subject_ids + list(procedure_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(medication_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(diagnostics_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(observation_output.keys())
+        union_subject_ids = list(set(union_subject_ids))
+
+        union_subject_ids = union_subject_ids + list(encounter_output.keys())
+        union_subject_ids = set(union_subject_ids)
+
+        for subject_id in patient_output:
+            if subject_id not in union_subject_ids:
+                continue
+
+            if subject_id not in encounter_output:
+                continue
+
+            final_merge[subject_id] = {}
+            for hospital_id in encounter_output[subject_id]:
+                output = FHIRprocessor.get_data(subject_id, hospital_id, procedure_output, medication_output,
+                                                diagnostics_output, observation_output, encounter_output, lengthOfStay)
+                final_merge[subject_id][hospital_id] = output
+
+        if lengthOfStay == False:
+            with open("data/final_merge.json", "w+") as fp:
+                json.dump(final_merge, fp)
+        else:
+            with open("data/final_merge_with_len.json", "w+") as fp:
+                json.dump(final_merge, fp)
