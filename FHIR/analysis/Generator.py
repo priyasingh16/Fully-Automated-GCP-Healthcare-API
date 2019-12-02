@@ -4,19 +4,21 @@ import json
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, list_IDs, batch_size=32, shuffle=True):
+    def __init__(self, list_IDs, batch_size=32, ModelName ="Survival", shuffle=True):
         'Initialization'
         self.batch_size = batch_size
         self.list_IDs = list_IDs
         self.shuffle = shuffle
+        self.ModelName = ModelName
         self.on_epoch_end()
-        with open("/home/monica/Documents/NEU/DataViz/data/final_merge_with_len.json") as fp:
+
+        with open("data/final_merge_with_len.json") as fp:
             self.model_data = json.load(fp)
 
-        with open("/home/monica/Documents/NEU/DataViz/data/patient_output.json") as fp:
+        with open("data/patient_output.json") as fp:
             self.patient_output = json.load(fp)
 
-        with open("/home/monica/Documents/NEU/DataViz/data/readmission_output.json") as fp:
+        with open("data/readmission_output.json") as fp:
             self.readmission_output = json.load(fp)
 
     def __len__(self):
@@ -30,9 +32,12 @@ class DataGenerator(keras.utils.Sequence):
         # Find list of IDs
         list_IDs_temp = [self.list_IDs[k] for k in indexes]
         # Generate data
-        X, y = self.__data_generation_readmission(list_IDs_temp)
-        # X, y = self.__data_generation_re_one_peid(list_IDs_temp)
-
+        if self.ModelName == "Survival":
+            X,y = self.__data_generation_patient(list_IDs_temp)
+        elif self.ModelName == "Readmission":
+            X,y = self.__data_generation_readmission(list_IDs_temp)
+        else:
+            X,y = self.__data_generation_patient(list_IDs_temp)
 
         return X, y
 
@@ -56,7 +61,7 @@ class DataGenerator(keras.utils.Sequence):
                 xseq = (self.model_data[subject_id][hospital_id])
                 newseq.append(xseq)
                 oldseq.append(xseq)
-                for i in range(count, 7):
+                for _ in range(count, 7):
                     newseq.append([0] * 814)
 
                 if count == 7:
@@ -79,7 +84,7 @@ class DataGenerator(keras.utils.Sequence):
                 seq.append(self.model_data[subject_id][hospital_id])
                 if count == 7:
                     break
-            for i in range(count, 7):
+            for _ in range(count, 7):
                 seq.append([0] * 814)
             X.append(seq)
             val = 0
@@ -101,7 +106,7 @@ class DataGenerator(keras.utils.Sequence):
                 seq.append(self.model_data[subject_id][hospital_id])
                 if count == 7:
                     break
-            for i in range(count, 7):
+            for _ in range(count, 7):
                 seq.append([0] * 814)
             X.append(seq)
             Y.append(int(self.patient_output[subject_id]["survived"]))
