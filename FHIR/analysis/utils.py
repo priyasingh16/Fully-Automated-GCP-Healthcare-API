@@ -1,6 +1,4 @@
-
 import datetime
-
 
 def getvalue(s):
     try:

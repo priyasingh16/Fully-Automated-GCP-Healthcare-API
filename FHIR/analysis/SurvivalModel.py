@@ -39,7 +39,7 @@ def main():
     hidden_state_dim = 200          # dimensionality of the hidden space.
     data_path = 'data/fra.txt'      # data Path "question'\t'answer" format
 
-    with open("data/final_merge.json") as fp:
+    with open("/home/monica/Documents/NEU/DataViz/data/final_merge_with_len.json") as fp:
         model_data = json.load(fp)
 
     ids = list(model_data.keys())
@@ -48,8 +48,9 @@ def main():
     X_train, X_test = train_test_split(ids, test_size=0.20, random_state=42)
     model = SurvivalPrediction()
     training_generator = DataGenerator(X_train, batch_size=batch_size)
+    print("training_generator", training_generator)
     validation_generator = DataGenerator(X_test, batch_size=batch_size)
-    model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=10)
+    model.fit_generator(generator=training_generator, validation_data=validation_generator, epochs=epochs)
 
 
 if __name__ == "__main__":
