@@ -62,10 +62,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# 28/492 [>.............................] - ETA: 2:15 - loss: 0.5034 - acc: 0.77752019-12-01 
-# 23:51:53.662380: W tensorflow/core/grappler/optimizers/implementation_selector.cc:199] Skipping optimization due to error while loading function 
-# libraries: Invalid argument: Functions '__inference___backward_standard_lstm_785_1287_specialized_for_Adam_gradients_lstm_StatefulPartitioned
-# Call_grad_StatefulPartitionedCall_at___inference_keras_scratch_graph_1857' and '__inference___backward_cudnn_lstm_344_520' both implement '
-# lstm_c6a0dc0f-9b04-4bd0-96e8-1b21f023b0a9' but their signatures do not match.
