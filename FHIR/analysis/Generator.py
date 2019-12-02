@@ -63,7 +63,6 @@ class DataGenerator(keras.utils.Sequence):
                 oldseq.append(xseq)
                 for _ in range(count, 7):
                     newseq.append([0] * 814)
-
                 if count == 7:
                     break
                 X.append(newseq)
