@@ -1,7 +1,7 @@
 
 import json
 from sklearn.model_selection import train_test_split
-from SurvivalGenerator import  DataGenerator
+from Generator import  DataGenerator
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Input 
 from utils import f1_m, precision_m, recall_m

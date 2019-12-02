@@ -35,7 +35,7 @@ class DataGenerator(keras.utils.Sequence):
         if self.ModelName == "Survival":
             X,y = self.__data_generation_patient(list_IDs_temp)
         elif self.ModelName == "Readmission":
-            X, y = self.__data_generation_readmission(list_IDs_temp)
+            X,y = self.__data_generation_readmission(list_IDs_temp)
         else:
             X,y = self.__data_generation_patient(list_IDs_temp)
 
@@ -61,7 +61,7 @@ class DataGenerator(keras.utils.Sequence):
                 xseq = (self.model_data[subject_id][hospital_id])
                 newseq.append(xseq)
                 oldseq.append(xseq)
-                for i in range(count, 7):
+                for _ in range(count, 7):
                     newseq.append([0] * 814)
 
                 if count == 7:
@@ -84,7 +84,7 @@ class DataGenerator(keras.utils.Sequence):
                 seq.append(self.model_data[subject_id][hospital_id])
                 if count == 7:
                     break
-            for i in range(count, 7):
+            for _ in range(count, 7):
                 seq.append([0] * 814)
             X.append(seq)
             val = 0
@@ -106,7 +106,7 @@ class DataGenerator(keras.utils.Sequence):
                 seq.append(self.model_data[subject_id][hospital_id])
                 if count == 7:
                     break
-            for i in range(count, 7):
+            for _ in range(count, 7):
                 seq.append([0] * 814)
             X.append(seq)
             Y.append(int(self.patient_output[subject_id]["survived"]))
